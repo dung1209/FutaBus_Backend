@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE hibernate-configuration PUBLIC
+      "-//Hibernate/Hibernate Configuration DTD 3.0//EN"
+      "http://www.hibernate.org/dtd/hibernate-configuration-3.0.dtd">
+
+<hibernate-configuration>
+
+	<session-factory>
+		<property name="hibernate.connection.driver_class">
+			com.microsoft.sqlserver.jdbc.SQLServerDriver
+		</property>
+
+		<property name="hibernate.connection.url">
+			jdbc:sqlserver://ADMIN-PC;databaseName=futabus_booking_db
+		</property>
+		<property name="hibernate.connection.username">sa</property>
+        <property name="hibernate.connection.password">123</property>
+
+		<property name="connection.pool_size">100</property>
+		<property name="hibernate.dialect">
+			org.hibernate.dialect.SQLServer2008Dialect
+		</property>
+
+		<property name="show_sql">true</property>
+		
+		<mapping class="FutaBus.bean.BenXe" />
+		<mapping class="FutaBus.bean.ChuyenXe" />
+		<mapping class="FutaBus.bean.LoaiXe" />
+		<mapping class="FutaBus.bean.LoTrinh" />
+		<mapping class="FutaBus.bean.NguoiDung" />
+		<mapping class="FutaBus.bean.PhanQuyen" />
+		<mapping class="FutaBus.bean.PhieuDatVe" />
+		<mapping class="FutaBus.bean.QuanHuyen" />
+		<mapping class="FutaBus.bean.TinhThanh" />
+		<mapping class="FutaBus.bean.TuyenXe" />
+		<mapping class="FutaBus.bean.VeXe" />
+		<mapping class="FutaBus.bean.ViTriGhe" />
+		<mapping class="FutaBus.bean.Xe" />
+
+	</session-factory>
+
+</hibernate-configuration>
