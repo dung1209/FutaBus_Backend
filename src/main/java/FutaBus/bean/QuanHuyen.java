@@ -14,48 +14,109 @@ public class QuanHuyen {
     @Column(name = "tenQuanHuyen", nullable = false, length = 255)
     private String tenQuanHuyen;
     
-    @Column(name = "idTinhThanh", nullable = false)
-    private int idTinhThanh;
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "idTinhThanh", nullable = false)
+    private TinhThanh tinhThanh;
 
     public QuanHuyen() {
     }
 
-    public QuanHuyen(int idQuanHuyen, String tenQuanHuyen, int idTinhThanh) {
-        this.idTinhThanh = idTinhThanh;
+    public QuanHuyen(int idQuanHuyen, String tenQuanHuyen, TinhThanh tinhThanh) {
+        this.idQuanHuyen = idQuanHuyen;
         this.tenQuanHuyen = tenQuanHuyen;
-        this.idTinhThanh = idTinhThanh;
+        this.tinhThanh = tinhThanh;
     }
 
     public int getIdQuanHuyen() {
-		return idQuanHuyen;
-	}
+        return idQuanHuyen;
+    }
 
-	public void setIdQuanHuyen(int idQuanHuyen) {
-		this.idQuanHuyen = idQuanHuyen;
-	}
+    public void setIdQuanHuyen(int idQuanHuyen) {
+        this.idQuanHuyen = idQuanHuyen;
+    }
 
-	public String getTenQuanHuyen() {
-		return tenQuanHuyen;
-	}
+    public String getTenQuanHuyen() {
+        return tenQuanHuyen;
+    }
 
-	public void setTenQuanHuyen(String tenQuanHuyen) {
-		this.tenQuanHuyen = tenQuanHuyen;
-	}
+    public void setTenQuanHuyen(String tenQuanHuyen) {
+        this.tenQuanHuyen = tenQuanHuyen;
+    }
 
-	public int getIdTinhThanh() {
-		return idTinhThanh;
-	}
+    public TinhThanh getTinhThanh() {
+        return tinhThanh;
+    }
 
-	public void setIdTinhThanh(int idTinhThanh) {
-		this.idTinhThanh = idTinhThanh;
-	}
+    public void setTinhThanh(TinhThanh tinhThanh) {
+        this.tinhThanh = tinhThanh;
+    }
 
-	@Override
+    @Override
     public String toString() {
         return "QuanHuyen{" +
                 "idQuanHuyen=" + idQuanHuyen +
-                "tenQuanHuyen=" + tenQuanHuyen +
-                ", idTinhThanh='" + idTinhThanh + '\'' +
+                ", tenQuanHuyen='" + tenQuanHuyen + '\'' +
+                ", tinhThanh=" + (tinhThanh != null ? tinhThanh.getTenTinh() : "N/A") +
                 '}';
     }
 }
+
+
+
+//@Entity
+//@Table(name = "QuanHuyen")
+//public class QuanHuyen {
+//
+//    @Id
+//    @GeneratedValue(strategy = GenerationType.IDENTITY)
+//    @Column(name = "idQuanHuyen")
+//    private int idQuanHuyen;
+//
+//    @Column(name = "tenQuanHuyen", nullable = false, length = 255)
+//    private String tenQuanHuyen;
+//    
+//    @Column(name = "idTinhThanh", nullable = false)
+//    private int idTinhThanh;
+//
+//    public QuanHuyen() {
+//    }
+//
+//    public QuanHuyen(int idQuanHuyen, String tenQuanHuyen, int idTinhThanh) {
+//        this.idTinhThanh = idTinhThanh;
+//        this.tenQuanHuyen = tenQuanHuyen;
+//        this.idTinhThanh = idTinhThanh;
+//    }
+//
+//    public int getIdQuanHuyen() {
+//		return idQuanHuyen;
+//	}
+//
+//	public void setIdQuanHuyen(int idQuanHuyen) {
+//		this.idQuanHuyen = idQuanHuyen;
+//	}
+//
+//	public String getTenQuanHuyen() {
+//		return tenQuanHuyen;
+//	}
+//
+//	public void setTenQuanHuyen(String tenQuanHuyen) {
+//		this.tenQuanHuyen = tenQuanHuyen;
+//	}
+//
+//	public int getIdTinhThanh() {
+//		return idTinhThanh;
+//	}
+//
+//	public void setIdTinhThanh(int idTinhThanh) {
+//		this.idTinhThanh = idTinhThanh;
+//	}
+//
+//	@Override
+//    public String toString() {
+//        return "QuanHuyen{" +
+//                "idQuanHuyen=" + idQuanHuyen +
+//                "tenQuanHuyen=" + tenQuanHuyen +
+//                ", idTinhThanh='" + idTinhThanh + '\'' +
+//                '}';
+//    }
+//}

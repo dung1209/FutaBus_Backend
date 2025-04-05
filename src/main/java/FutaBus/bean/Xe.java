@@ -17,7 +17,7 @@ public class Xe {
     @Column(name = "tenXe", nullable = false, length = 255)
     private String tenXe;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "idLoaiXe", nullable = false)
     private LoaiXe loaiXe;
 
