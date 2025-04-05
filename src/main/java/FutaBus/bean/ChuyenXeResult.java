@@ -1,0 +1,95 @@
+package FutaBus.bean;
+
+import java.sql.Date;
+import java.sql.Timestamp;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
+
+public class ChuyenXeResult {
+    private float thoiGianDiChuyenTB;
+    private String tenBenXeDi;
+    private String tenBenXeDen;
+    private Double giaHienHanh;
+    private String thoiDiemDi;
+    private String thoiDiemDen;
+    
+    private String tenLoai;
+    private Long soGheTrong;
+
+    public ChuyenXeResult(float thoiGianDiChuyenTB, String tenBenXeDi, String tenBenXeDen, Double giaHienHanh,
+    		String thoiDiemDi, String thoiDiemDen, String tenLoai, Long soGheTrong) {
+		super();
+		this.thoiGianDiChuyenTB = thoiGianDiChuyenTB;
+		this.tenBenXeDi = tenBenXeDi;
+		this.tenBenXeDen = tenBenXeDen;
+		this.giaHienHanh = giaHienHanh;
+		this.thoiDiemDi = thoiDiemDi;
+		this.thoiDiemDen = thoiDiemDen;
+		this.tenLoai = tenLoai;
+		this.soGheTrong = soGheTrong;
+	}
+
+	public float getThoiGianDiChuyenTB() {
+        return thoiGianDiChuyenTB;
+    }
+
+	public void setThoiGianDiChuyenTB(float thoiGianDiChuyenTB) {
+        this.thoiGianDiChuyenTB = thoiGianDiChuyenTB;
+    }
+
+    public String getTenBenXeDi() {
+        return tenBenXeDi;
+    }
+
+    public void setTenBenXeDi(String tenBenXeDi) {
+        this.tenBenXeDi = tenBenXeDi;
+    }
+
+    public String getTenBenXeDen() {
+        return tenBenXeDen;
+    }
+
+    public void setTenBenXeDen(String tenBenXeDen) {
+        this.tenBenXeDen = tenBenXeDen;
+    }
+
+    public Double getGiaHienHanh() {
+        return giaHienHanh;
+    }
+
+    public void setGiaHienHanh(Double giaHienHanh) {
+        this.giaHienHanh = giaHienHanh;
+    }
+
+    public String getThoiDiemDi() {
+        return thoiDiemDi;
+    }
+
+    public void setThoiDiemDi(String thoiDiemDi) {
+        this.thoiDiemDi = thoiDiemDi;
+    }
+
+    public String getThoiDiemDen() {
+        return thoiDiemDen;
+    }
+
+    public void setThoiDiemDen(String thoiDiemDen) {
+        this.thoiDiemDen = thoiDiemDen;
+    }
+
+    public String getTenLoai() {
+        return tenLoai;
+    }
+
+    public void setTenLoai(String tenLoai) {
+        this.tenLoai = tenLoai;
+    }
+
+    public Long getSoGheTrong() {
+        return soGheTrong;
+    }
+
+    public void setSoGheTrong(Long soGheTrong) {
+        this.soGheTrong = soGheTrong;
+    }
+}

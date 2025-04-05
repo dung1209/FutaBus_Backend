@@ -1,9 +1,14 @@
 package SpringMVC.ApiController;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 
 import javax.servlet.http.HttpSession;
 
@@ -28,6 +33,7 @@ import Dao.TuyenXeDao;
 import Dao.XeDao;
 import FutaBus.bean.BenXe;
 import FutaBus.bean.ChuyenXe;
+import FutaBus.bean.ChuyenXeResult;
 import FutaBus.bean.NguoiDung;
 import FutaBus.bean.QuanHuyen;
 import FutaBus.bean.TinhThanh;
@@ -56,28 +62,48 @@ public class UserApiController {
 	@GetMapping("/trip-selection")
 	@ResponseBody
 	public ResponseEntity<Map<String, Object>> tripSelectionPage(
+			@RequestParam int departureId,
 	        @RequestParam String departure,
+	        @RequestParam int destinationId,
 	        @RequestParam String destination,
 	        @RequestParam String departureDate,
 	        @RequestParam(required = false) String returnDate,
 	        @RequestParam int tickets) {
+	    
+	    DateTimeFormatter inputFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+        DateTimeFormatter outputFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
-	    System.out.println("✅ Nhận dữ liệu từ URL:");
-	    System.out.println("🚏 Điểm đi: " + departure);
-	    System.out.println("🏁 Điểm đến: " + destination);
-	    System.out.println("📅 Ngày đi: " + departureDate);
-	    System.out.println("🔄 Ngày về: " + (returnDate != null ? returnDate : "Không có"));
-	    System.out.println("🎟️ Số vé: " + tickets);
+        LocalDate date = LocalDate.parse(departureDate, inputFormatter);
+        String formattedDate = date.format(outputFormatter);
+	    
+	    ChuyenXeDao chuyenXeDao = new ChuyenXeDao();
+	    List<ChuyenXeResult> chuyenXeResultList = chuyenXeDao.getChuyenXe(departureId, destinationId, formattedDate, tickets);
+	    int numberOfTrips = chuyenXeResultList.size();
 
 	    Map<String, Object> response = new HashMap<>();
 	    response.put("status", "success");
+	    response.put("departureId", departureId);
 	    response.put("departure", departure);
+	    response.put("destinationId", destinationId);
 	    response.put("destination", destination);
 	    response.put("departureDate", departureDate);
 	    response.put("returnDate", returnDate);
 	    response.put("tickets", tickets);
+	    response.put("numberOfTrips", numberOfTrips);
+	    response.put("chuyenXeResultList", chuyenXeResultList);
 
 	    return ResponseEntity.ok(response);
 	}
+	
+	public static String changeDateFormat(String inputDate) {
+        try {
+            SimpleDateFormat originalFormat = new SimpleDateFormat("yyyy/MM/dd");
+            SimpleDateFormat targetFormat = new SimpleDateFormat("dd-MM-yyyy");
+            return targetFormat.format(originalFormat.parse(inputDate));
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
 
 }
