@@ -12,12 +12,12 @@ public class ChuyenXeResult {
     private Double giaHienHanh;
     private String thoiDiemDi;
     private String thoiDiemDen;
-    
     private String tenLoai;
     private Long soGheTrong;
-
+    private int idXe;
+    
     public ChuyenXeResult(float thoiGianDiChuyenTB, String tenBenXeDi, String tenBenXeDen, Double giaHienHanh,
-    		String thoiDiemDi, String thoiDiemDen, String tenLoai, Long soGheTrong) {
+    		String thoiDiemDi, String thoiDiemDen, String tenLoai, Long soGheTrong, int idXe) {
 		super();
 		this.thoiGianDiChuyenTB = thoiGianDiChuyenTB;
 		this.tenBenXeDi = tenBenXeDi;
@@ -27,6 +27,7 @@ public class ChuyenXeResult {
 		this.thoiDiemDen = thoiDiemDen;
 		this.tenLoai = tenLoai;
 		this.soGheTrong = soGheTrong;
+		this.idXe = idXe;
 	}
 
 	public float getThoiGianDiChuyenTB() {
@@ -92,4 +93,12 @@ public class ChuyenXeResult {
     public void setSoGheTrong(Long soGheTrong) {
         this.soGheTrong = soGheTrong;
     }
+
+	public int getIdXe() {
+		return idXe;
+	}
+
+	public void setIdXe(int idXe) {
+		this.idXe = idXe;
+	}
 }

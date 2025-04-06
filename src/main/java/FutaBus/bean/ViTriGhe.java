@@ -17,11 +17,10 @@ public class ViTriGhe {
     @Column(name = "trangThai", nullable = false)
     private int trangThai;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "idXe", referencedColumnName = "idXe")
-    private Xe xe;  // Quan hệ ManyToOne với Xe
+    private Xe xe;
 
-    // Getter và setter cho xe
     public Xe getXe() {
         return xe;
     }
@@ -30,7 +29,6 @@ public class ViTriGhe {
         this.xe = xe;
     }
 
-    // Getter và setter cho các trường khác
     public int getIdViTriGhe() {
         return idViTriGhe;
     }

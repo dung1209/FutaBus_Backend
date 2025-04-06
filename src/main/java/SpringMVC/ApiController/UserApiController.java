@@ -1,5 +1,6 @@
 package SpringMVC.ApiController;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -30,6 +31,7 @@ import Dao.NguoiDungDao;
 import Dao.QuanHuyenDao;
 import Dao.TinhThanhDao;
 import Dao.TuyenXeDao;
+import Dao.ViTriGheDao;
 import Dao.XeDao;
 import FutaBus.bean.BenXe;
 import FutaBus.bean.ChuyenXe;
@@ -38,6 +40,7 @@ import FutaBus.bean.NguoiDung;
 import FutaBus.bean.QuanHuyen;
 import FutaBus.bean.TinhThanh;
 import FutaBus.bean.TuyenXe;
+import FutaBus.bean.ViTriGhe;
 import FutaBus.bean.Xe;
 import FutaBus.bean.LoaiXe;
 import java.net.URLEncoder;
@@ -95,15 +98,56 @@ public class UserApiController {
 	    return ResponseEntity.ok(response);
 	}
 	
-	public static String changeDateFormat(String inputDate) {
-        try {
-            SimpleDateFormat originalFormat = new SimpleDateFormat("yyyy/MM/dd");
-            SimpleDateFormat targetFormat = new SimpleDateFormat("dd-MM-yyyy");
-            return targetFormat.format(originalFormat.parse(inputDate));
-        } catch (Exception e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
+	@GetMapping("/book-tickets")
+	@ResponseBody
+	public ResponseEntity<Map<String, Object>> bookTicketsPage(
+	        @RequestParam int departureId,
+	        @RequestParam String departure,
+	        @RequestParam int destinationId,
+	        @RequestParam String destination,
+	        @RequestParam String start,
+	        @RequestParam String end,
+	        @RequestParam String departureDate,
+	        @RequestParam(required = false) String returnDate, 
+	        @RequestParam String startTime,
+	        @RequestParam String endTime,
+	        @RequestParam String loai,
+	        @RequestParam String price,
+	        @RequestParam int soGhe,
+	        @RequestParam int idXe) {
+	    
+	    ViTriGheDao viTriGheDao = new ViTriGheDao();
+	    List<ViTriGhe> viTriGheTangDuoiList = viTriGheDao.getViTriGheTangDuoiByIdXe(idXe);
+	    List<ViTriGhe> viTriGheTangTrenList = viTriGheDao.getViTriGheTangTrenByIdXe(idXe);
+	    
+	    if (viTriGheTangDuoiList == null) {
+	        viTriGheTangDuoiList = new ArrayList<>();
+	    }
+
+	    if (viTriGheTangTrenList == null) {
+	        viTriGheTangTrenList = new ArrayList<>();
+	    }
+
+
+	    Map<String, Object> response = new HashMap<>();
+	    response.put("status", "success");
+	    response.put("departureId", departureId);
+	    response.put("departure", departure);
+	    response.put("destinationId", destinationId);
+	    response.put("destination", destination);
+	    response.put("departureDate", departureDate);
+	    response.put("returnDate", returnDate);
+	    response.put("start", start);
+	    response.put("end", end);
+	    response.put("startTime", startTime);
+	    response.put("endTime", endTime);
+	    response.put("loai", loai);
+	    response.put("price", price);
+	    response.put("soGhe", soGhe);
+	    response.put("idXe", idXe);
+	    response.put("viTriGheTangDuoiList", viTriGheTangDuoiList);
+	    response.put("viTriGheTangTrenList", viTriGheTangTrenList);
+	    return ResponseEntity.ok(response);
+	}
 
 }

@@ -97,7 +97,8 @@ public class ChuyenXeDao {
                     "    c.thoiDiemDi, " +
                     "    c.thoiDiemDen, " +
                     "    lx.tenLoai, " +
-                    "    COUNT(vt.idViTriGhe) AS soGheTrong " +
+                    "    COUNT(vt.idViTriGhe) AS soGheTrong, " +
+                    "    x.idXe " +
                     "FROM " +
                     "    ChuyenXe c " +
                     "JOIN c.tuyenXe t " +
@@ -112,7 +113,7 @@ public class ChuyenXeDao {
                     "    CONVERT(DATE, c.thoiDiemDi) = CONVERT(DATE, :departureDate) " + 
                     "GROUP BY " +
                     "    t.thoiGianDiChuyenTB, bendi.tenBenXe, benden.tenBenXe, " +
-                    "    t.giaHienHanh, c.thoiDiemDi, c.thoiDiemDen, lx.tenLoai " +
+                    "    t.giaHienHanh, c.thoiDiemDi, c.thoiDiemDen, lx.tenLoai, x.idXe " +
                     "HAVING " +
                     "    COUNT(vt.idViTriGhe) >= :tickets";
 
@@ -135,7 +136,8 @@ public class ChuyenXeDao {
             	        (String) thoiDiemDi,
             	        (String) thoiDiemDen,
             	        (String) result[6],
-            	        (Long) result[7]
+            	        (Long) result[7],
+            	        (int) result[8]
             	);
             	chuyenXeResultList.add(chuyenXeResult);
             }
