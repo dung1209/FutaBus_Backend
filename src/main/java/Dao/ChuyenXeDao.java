@@ -94,6 +94,7 @@ public class ChuyenXeDao {
                     "    bendi.tenBenXe AS tenBenXeDi, " +
                     "    benden.tenBenXe AS tenBenXeDen, " +
                     "    t.giaHienHanh, " +
+                    "    c.idChuyenXe, " +
                     "    c.thoiDiemDi, " +
                     "    c.thoiDiemDen, " +
                     "    lx.tenLoai, " +
@@ -113,7 +114,7 @@ public class ChuyenXeDao {
                     "    CONVERT(DATE, c.thoiDiemDi) = CONVERT(DATE, :departureDate) " + 
                     "GROUP BY " +
                     "    t.thoiGianDiChuyenTB, bendi.tenBenXe, benden.tenBenXe, " +
-                    "    t.giaHienHanh, c.thoiDiemDi, c.thoiDiemDen, lx.tenLoai, x.idXe " +
+                    "    t.giaHienHanh, c.idChuyenXe, c.thoiDiemDi, c.thoiDiemDen, lx.tenLoai, x.idXe " +
                     "HAVING " +
                     "    COUNT(vt.idViTriGhe) >= :tickets";
 
@@ -126,18 +127,19 @@ public class ChuyenXeDao {
             List<Object[]> resultList = query.getResultList();
 
             for (Object[] result : resultList) {
-            	String thoiDiemDi = result[4] != null ? new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format((Timestamp) result[4]) : null;
-            	String thoiDiemDen = result[5] != null ? new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format((Timestamp) result[5]) : null;
+            	String thoiDiemDi = result[5] != null ? new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format((Timestamp) result[5]) : null;
+            	String thoiDiemDen = result[6] != null ? new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format((Timestamp) result[6]) : null;
             	ChuyenXeResult chuyenXeResult = new ChuyenXeResult(
             	        (float) result[0],
             	        (String) result[1],
             	        (String) result[2],
             	        (Double) result[3],
+            	        (int) result[4],
             	        (String) thoiDiemDi,
             	        (String) thoiDiemDen,
-            	        (String) result[6],
-            	        (Long) result[7],
-            	        (int) result[8]
+            	        (String) result[7],
+            	        (Long) result[8],
+            	        (int) result[9]
             	);
             	chuyenXeResultList.add(chuyenXeResult);
             }

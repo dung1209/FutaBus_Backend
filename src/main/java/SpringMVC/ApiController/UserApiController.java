@@ -24,6 +24,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import Dao.BenXeDao;
 import Dao.ChuyenXeDao;
 import Dao.LoaiXeDao;
@@ -34,6 +38,7 @@ import Dao.TuyenXeDao;
 import Dao.ViTriGheDao;
 import Dao.XeDao;
 import FutaBus.bean.BenXe;
+import FutaBus.bean.BookingRequest;
 import FutaBus.bean.ChuyenXe;
 import FutaBus.bean.ChuyenXeResult;
 import FutaBus.bean.NguoiDung;
@@ -109,6 +114,7 @@ public class UserApiController {
 	        @RequestParam String end,
 	        @RequestParam String departureDate,
 	        @RequestParam(required = false) String returnDate, 
+	        @RequestParam int idTrip,
 	        @RequestParam String startTime,
 	        @RequestParam String endTime,
 	        @RequestParam String loai,
@@ -139,6 +145,7 @@ public class UserApiController {
 	    response.put("returnDate", returnDate);
 	    response.put("start", start);
 	    response.put("end", end);
+	    response.put("idTrip", idTrip);
 	    response.put("startTime", startTime);
 	    response.put("endTime", endTime);
 	    response.put("loai", loai);
@@ -149,5 +156,85 @@ public class UserApiController {
 	    response.put("viTriGheTangTrenList", viTriGheTangTrenList);
 	    return ResponseEntity.ok(response);
 	}
+
+	@GetMapping("/checkout")
+	@ResponseBody
+	public ResponseEntity<Map<String, Object>> checkoutPage(
+	        @RequestParam int selectedSeatsCount,
+	        @RequestParam double totalPrice,
+	        @RequestParam String nameValue,
+	        @RequestParam String phoneValue,
+	        @RequestParam String emailValue,
+	        @RequestParam String selectedSeats,
+	        @RequestParam String selectedSeatIds,
+	        @RequestParam Long idTrip,
+	        @RequestParam String formattedStartTime,
+	        @RequestParam String weekday,
+	        @RequestParam int departureId,
+	        @RequestParam String departure,
+	        @RequestParam int destinationId,
+	        @RequestParam String destination,
+	        @RequestParam String start,
+	        @RequestParam String end,
+	        @RequestParam String departureDate,
+	        @RequestParam String returnDate,
+	        @RequestParam String startTime,
+	        @RequestParam String endTime,
+	        @RequestParam String loai,
+	        @RequestParam double price,
+	        @RequestParam int soGhe,
+	        @RequestParam Long idXe) {
+		
+	    Map<String, Object> response = new HashMap<>();
+	    response.put("status", "success");
+	    response.put("selectedSeatsCount", selectedSeatsCount);
+	    response.put("totalPrice", totalPrice);
+	    response.put("nameValue", nameValue);
+	    response.put("phoneValue", phoneValue);
+	    response.put("emailValue", emailValue);
+	    response.put("selectedSeats", selectedSeats);
+	    response.put("selectedSeatIds", selectedSeatIds);
+	    response.put("idTrip", idTrip);
+	    response.put("formattedStartTime", formattedStartTime);
+	    response.put("weekday", weekday);
+	    response.put("departureId", departureId);
+	    response.put("departure", departure);
+	    response.put("destinationId", destinationId);
+	    response.put("destination", destination);
+	    response.put("start", start);
+	    response.put("end", end);
+	    response.put("departureDate", departureDate);
+	    response.put("returnDate", returnDate);
+	    response.put("startTime", startTime);
+	    response.put("endTime", endTime);
+	    response.put("loai", loai);
+	    response.put("price", price);
+	    response.put("soGhe", soGhe);
+	    response.put("idXe", idXe);
+
+	    return ResponseEntity.ok(response);
+	}
+
+//	@PostMapping("/confirmBooking")
+//	@ResponseBody
+//	public ResponseEntity<Map<String, Object>> confirmBooking(@RequestBody BookingRequest bookingRequest) {
+//	    // Giả sử bạn có service lưu dữ liệu vào DB
+//	    // bookingService.saveBooking(bookingRequest);
+//
+//	    System.out.println("Nhận dữ liệu đặt vé từ client:");
+//	    System.out.println("soLuongVe: " + bookingRequest.getSoLuongVe());
+//	    System.out.println("tongTien: " + bookingRequest.getTongTien());
+//	    System.out.println("hoTen: " + bookingRequest.getHoTen());
+//	    System.out.println("soDienThoai: " + bookingRequest.getSoDienThoai());
+//	    System.out.println("email: " + bookingRequest.getEmail());
+//	    System.out.println("idChuyenXe: " + bookingRequest.getIdChuyenXe());
+//	    System.out.println("idViTriGhe: " + bookingRequest.getIdViTriGhe());
+//
+//	    Map<String, Object> response = new HashMap<>();
+//	    response.put("status", "success");
+//	    response.put("message", "Đặt vé thành công!");
+//
+//	    return ResponseEntity.ok(response);
+//	}
 
 }

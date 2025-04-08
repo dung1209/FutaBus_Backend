@@ -10,6 +10,7 @@ public class ChuyenXeResult {
     private String tenBenXeDi;
     private String tenBenXeDen;
     private Double giaHienHanh;
+    private int tripId;
     private String thoiDiemDi;
     private String thoiDiemDen;
     private String tenLoai;
@@ -17,12 +18,13 @@ public class ChuyenXeResult {
     private int idXe;
     
     public ChuyenXeResult(float thoiGianDiChuyenTB, String tenBenXeDi, String tenBenXeDen, Double giaHienHanh,
-    		String thoiDiemDi, String thoiDiemDen, String tenLoai, Long soGheTrong, int idXe) {
+    		int tripId, String thoiDiemDi, String thoiDiemDen, String tenLoai, Long soGheTrong, int idXe) {
 		super();
 		this.thoiGianDiChuyenTB = thoiGianDiChuyenTB;
 		this.tenBenXeDi = tenBenXeDi;
 		this.tenBenXeDen = tenBenXeDen;
 		this.giaHienHanh = giaHienHanh;
+		this.tripId = tripId;
 		this.thoiDiemDi = thoiDiemDi;
 		this.thoiDiemDen = thoiDiemDen;
 		this.tenLoai = tenLoai;
@@ -62,7 +64,15 @@ public class ChuyenXeResult {
         this.giaHienHanh = giaHienHanh;
     }
 
-    public String getThoiDiemDi() {
+    public int getTripId() {
+		return tripId;
+	}
+
+	public void setTripId(int tripId) {
+		this.tripId = tripId;
+	}
+
+	public String getThoiDiemDi() {
         return thoiDiemDi;
     }
 
