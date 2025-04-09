@@ -9,6 +9,9 @@ public class BookingRequest {
     private int idChuyenXe;
     private String idViTriGhe;
     
+    public BookingRequest() {
+    }
+    
 	public BookingRequest(int soLuongVe, double tongTien, String hoTen, String soDienThoai, String email,
 			int idChuyenXe, String idViTriGhe) {
 		super();

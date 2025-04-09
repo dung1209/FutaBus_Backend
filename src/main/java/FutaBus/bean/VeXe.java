@@ -14,9 +14,6 @@ public class VeXe {
     @Column(name = "idPhieuDatVe", nullable = false)
     private int idPhieuDatVe;
 
-    @Column(name = "idChuyenXe", nullable = false)
-    private int idChuyenXe;
-
     @Column(name = "trangThai", nullable = false)
     private int trangThai;
 
@@ -26,10 +23,9 @@ public class VeXe {
     public VeXe() {
     }
 
-    public VeXe(int idVe, int idPhieuDatVe, int idChuyenXe, int trangThai, int idViTriGhe) {
+    public VeXe(int idVe, int idPhieuDatVe, int trangThai, int idViTriGhe) {
         this.idVe = idVe;
         this.idPhieuDatVe = idPhieuDatVe;
-        this.idChuyenXe = idChuyenXe;
         this.trangThai = trangThai;
         this.idViTriGhe = idViTriGhe;
     }
@@ -48,14 +44,6 @@ public class VeXe {
 
     public void setIdPhieuDatVe(int idPhieuDatVe) {
         this.idPhieuDatVe = idPhieuDatVe;
-    }
-
-    public int getIdChuyenXe() {
-        return idChuyenXe;
-    }
-
-    public void setIdChuyenXe(int idChuyenXe) {
-        this.idChuyenXe = idChuyenXe;
     }
 
     public int isTrangThai() {
@@ -79,7 +67,6 @@ public class VeXe {
         return "VeXe{" +
                 "idVe=" + idVe +
                 ", idPhieuDatVe=" + idPhieuDatVe +
-                ", idChuyenXe=" + idChuyenXe +
                 ", trangThai=" + trangThai +
                 ", idViTriGhe=" + idViTriGhe +
                 '}';

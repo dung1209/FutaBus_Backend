@@ -77,5 +77,35 @@ public class ViTriGheDao {
         }
         return viTriGheList;
     }
+    
+    public void updateTrangThai(int gheId, int trangThai) {
+        Session session = null;
+        Transaction transaction = null;
+
+        try {
+            if (factory == null) {
+                factory = HibernateUtils.getSessionFactory();
+            }
+            session = factory.openSession();
+            transaction = session.beginTransaction();
+
+            String hql = "UPDATE ViTriGhe SET trangThai = :trangThai WHERE id = :gheId";
+            Query<?> query = session.createQuery(hql);
+            query.setParameter("trangThai", trangThai);
+            query.setParameter("gheId", gheId);
+
+            query.executeUpdate();
+            transaction.commit();
+        } catch (Exception e) {
+            if (transaction != null) {
+                transaction.rollback();
+            }
+            e.printStackTrace();
+        } finally {
+            if (session != null) {
+                session.close();
+            }
+        }
+    }
 
 }

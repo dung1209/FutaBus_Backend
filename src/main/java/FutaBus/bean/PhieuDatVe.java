@@ -23,30 +23,84 @@ public class PhieuDatVe {
     @Column(name = "tongTien", nullable = false, precision = 10, scale = 2)
     private BigDecimal tongTien;
 
-    @Column(name = "trangThaiVe", nullable = false)
-    private int trangThaiVe;
+    @Column(name = "trangThai", nullable = false)
+    private int trangThai;
     
     @Column(name = "thoiGianCapNhat", nullable = false)
     @Temporal(TemporalType.TIMESTAMP)
     private Date thoiGianCapNhat;
+    
+    @Column(name = "hoTen", nullable = false, length = 255)
+    private String hoTen;
+    
+    @Column(name = "soDienThoai", nullable = false, length = 10)
+    private String soDienThoai;
+    
+    @Column(name = "email", nullable = false, length = 320)
+    private String email;
 
     @Column(name = "idNguoiDung", nullable = false)
     private int idNguoiDung;
+    
+    @Column(name = "idChuyenXe", nullable = false)
+    private int idChuyenXe;
 
     public PhieuDatVe() {
     }
 
-    public PhieuDatVe(int idPhieuDatVe, Date thoiGianDatVe, int soLuongVe, BigDecimal tongTien, int trangThaiVe, Date thoiGianCapNhat, int idNguoiDung) {
-        this.idPhieuDatVe = idPhieuDatVe;
-        this.thoiGianDatVe = thoiGianDatVe;
-        this.soLuongVe = soLuongVe;
-        this.tongTien = tongTien;
-        this.trangThaiVe = trangThaiVe;
-        this.thoiGianCapNhat = thoiGianCapNhat;
-        this.idNguoiDung = idNguoiDung;
-    }
+	public PhieuDatVe(int idPhieuDatVe, Date thoiGianDatVe, int soLuongVe, BigDecimal tongTien, int trangThai,
+			Date thoiGianCapNhat, String hoTen, String soDienThoai, String email, int idNguoiDung, int idChuyenXe) {
+		super();
+		this.idPhieuDatVe = idPhieuDatVe;
+		this.thoiGianDatVe = thoiGianDatVe;
+		this.soLuongVe = soLuongVe;
+		this.tongTien = tongTien;
+		this.trangThai = trangThai;
+		this.thoiGianCapNhat = thoiGianCapNhat;
+		this.hoTen = hoTen;
+		this.soDienThoai = soDienThoai;
+		this.email = email;
+		this.idNguoiDung = idNguoiDung;
+		this.idChuyenXe = idChuyenXe;
+	}
 
-    public int getIdPhieuDatVe() {
+	public int getIdChuyenXe() {
+		return idChuyenXe;
+	}
+
+	public void setIdChuyenXe(int idChuyenXe) {
+		this.idChuyenXe = idChuyenXe;
+	}
+
+	public String getHoTen() {
+		return hoTen;
+	}
+
+	public void setHoTen(String hoTen) {
+		this.hoTen = hoTen;
+	}
+
+	public String getSoDienThoai() {
+		return soDienThoai;
+	}
+
+	public void setSoDienThoai(String soDienThoai) {
+		this.soDienThoai = soDienThoai;
+	}
+
+	public String getEmail() {
+		return email;
+	}
+
+	public void setEmail(String email) {
+		this.email = email;
+	}
+
+	public int getTrangThai() {
+		return trangThai;
+	}
+
+	public int getIdPhieuDatVe() {
         return idPhieuDatVe;
     }
 
@@ -78,12 +132,12 @@ public class PhieuDatVe {
         this.tongTien = tongTien;
     }
 
-    public int isTrangThaiVe() {
-        return trangThaiVe;
+    public int isTrangThai() {
+        return trangThai;
     }
 
-    public void setTrangThaiVe(int trangThaiVe) {
-        this.trangThaiVe = trangThaiVe;
+    public void setTrangThai(int trangThai) {
+        this.trangThai = trangThai;
     }
 
     public Date getThoiGianCapNhat() {
@@ -102,16 +156,12 @@ public class PhieuDatVe {
         this.idNguoiDung = idNguoiDung;
     }
 
-    @Override
-    public String toString() {
-        return "PhieuDatVe{" +
-                "idPhieuDatVe=" + idPhieuDatVe +
-                ", thoiGianDatVe=" + thoiGianDatVe +
-                ", soLuongVe=" + soLuongVe +
-                ", tongTien=" + tongTien +
-                ", trangThaiVe=" + trangThaiVe +
-                ", thoiGianCapNhat=" + thoiGianCapNhat +
-                ", idNguoiDung=" + idNguoiDung +
-                '}';
-    }
+	@Override
+	public String toString() {
+		return "PhieuDatVe [idPhieuDatVe=" + idPhieuDatVe + ", thoiGianDatVe=" + thoiGianDatVe + ", soLuongVe="
+				+ soLuongVe + ", tongTien=" + tongTien + ", trangThai=" + trangThai + ", thoiGianCapNhat="
+				+ thoiGianCapNhat + ", hoTen=" + hoTen + ", soDienThoai=" + soDienThoai + ", email=" + email
+				+ ", idNguoiDung=" + idNguoiDung + ", idChuyenXe=" + idChuyenXe + "]";
+	}
+
 }

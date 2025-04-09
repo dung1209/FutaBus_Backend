@@ -1,14 +1,17 @@
 package SpringMVC.ApiController;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Collectors;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
 import javax.servlet.http.HttpSession;
@@ -32,6 +35,7 @@ import Dao.BenXeDao;
 import Dao.ChuyenXeDao;
 import Dao.LoaiXeDao;
 import Dao.NguoiDungDao;
+import Dao.PhieuDatVeDao;
 import Dao.QuanHuyenDao;
 import Dao.TinhThanhDao;
 import Dao.TuyenXeDao;
@@ -134,7 +138,6 @@ public class UserApiController {
 	        viTriGheTangTrenList = new ArrayList<>();
 	    }
 
-
 	    Map<String, Object> response = new HashMap<>();
 	    response.put("status", "success");
 	    response.put("departureId", departureId);
@@ -215,26 +218,44 @@ public class UserApiController {
 	    return ResponseEntity.ok(response);
 	}
 
-//	@PostMapping("/confirmBooking")
-//	@ResponseBody
-//	public ResponseEntity<Map<String, Object>> confirmBooking(@RequestBody BookingRequest bookingRequest) {
-//	    // Giả sử bạn có service lưu dữ liệu vào DB
-//	    // bookingService.saveBooking(bookingRequest);
-//
-//	    System.out.println("Nhận dữ liệu đặt vé từ client:");
-//	    System.out.println("soLuongVe: " + bookingRequest.getSoLuongVe());
-//	    System.out.println("tongTien: " + bookingRequest.getTongTien());
-//	    System.out.println("hoTen: " + bookingRequest.getHoTen());
-//	    System.out.println("soDienThoai: " + bookingRequest.getSoDienThoai());
-//	    System.out.println("email: " + bookingRequest.getEmail());
-//	    System.out.println("idChuyenXe: " + bookingRequest.getIdChuyenXe());
-//	    System.out.println("idViTriGhe: " + bookingRequest.getIdViTriGhe());
-//
-//	    Map<String, Object> response = new HashMap<>();
-//	    response.put("status", "success");
-//	    response.put("message", "Đặt vé thành công!");
-//
-//	    return ResponseEntity.ok(response);
-//	}
+	@PostMapping("/confirmBooking")
+	@ResponseBody
+	public ResponseEntity<Map<String, Object>> confirmBooking(@RequestBody BookingRequest bookingRequest) {
+		
+		LocalDateTime now = LocalDateTime.now();
+	    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+	    String formattedDateTime = now.format(formatter);
+	    
+	    System.out.println("Nhận dữ liệu đặt vé từ client:");
+	    System.out.println("thoiGianDatVe: " + formattedDateTime);
+	    System.out.println("soLuongVe: " + bookingRequest.getSoLuongVe());
+	    System.out.println("tongTien: " + bookingRequest.getTongTien());
+	    //System.out.println("trangThai: " + bookingRequest.getTongTien());
+	    System.out.println("thoiGianCapNhat: " + formattedDateTime);
+	    System.out.println("hoTen: " + bookingRequest.getHoTen());
+	    System.out.println("soDienThoai: " + bookingRequest.getSoDienThoai());
+	    System.out.println("email: " + bookingRequest.getEmail());
+	    //System.out.println("idNguoiDung: " + bookingRequest.getEmail());
+	    System.out.println("idChuyenXe: " + bookingRequest.getIdChuyenXe());
+	    
+	    String idViTriGheStr = bookingRequest.getIdViTriGhe(); // "1007,1008"
+
+	    List<Integer> gheList = Arrays.stream(idViTriGheStr.split(","))
+	                                  .map(Integer::parseInt)
+	                                  .collect(Collectors.toList());
+	    System.out.println("gheList: " + gheList);
+	    //System.out.println("trangThai: " + bookingRequest.getIdViTriGhe());
+	    System.out.println("idViTriGhe: " + bookingRequest.getIdViTriGhe());
+	   //System.out.println("idPhieuDatVe: " + bookingRequest.getIdViTriGhe());
+	    
+	    PhieuDatVeDao phieuDatVeDao = new PhieuDatVeDao();
+	    phieuDatVeDao.saveBooking(bookingRequest);
+
+	    Map<String, Object> response = new HashMap<>();
+	    response.put("status", "success");
+	    response.put("message", "Đặt vé thành công!");
+
+	    return ResponseEntity.ok(response);
+	}
 
 }
