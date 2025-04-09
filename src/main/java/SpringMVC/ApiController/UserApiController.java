@@ -91,6 +91,16 @@ public class UserApiController {
 	    ChuyenXeDao chuyenXeDao = new ChuyenXeDao();
 	    List<ChuyenXeResult> chuyenXeResultList = chuyenXeDao.getChuyenXe(departureId, destinationId, formattedDate, tickets);
 	    int numberOfTrips = chuyenXeResultList.size();
+	    
+	    List<ChuyenXeResult> chuyenXeReturnList = new ArrayList<>();
+	    int numberOfTripReturns = chuyenXeReturnList.size();
+	    
+	    if (returnDate != null && !returnDate.trim().isEmpty()) {
+	        LocalDate dateReturn = LocalDate.parse(returnDate, inputFormatter);
+	        String formattedDateReturn = dateReturn.format(outputFormatter);
+	        chuyenXeReturnList = chuyenXeDao.getChuyenXe(destinationId, departureId, formattedDateReturn, tickets);
+	        numberOfTripReturns = chuyenXeReturnList.size();
+	    }
 
 	    Map<String, Object> response = new HashMap<>();
 	    response.put("status", "success");
@@ -102,7 +112,9 @@ public class UserApiController {
 	    response.put("returnDate", returnDate);
 	    response.put("tickets", tickets);
 	    response.put("numberOfTrips", numberOfTrips);
+	    response.put("numberOfTripReturns", numberOfTripReturns);
 	    response.put("chuyenXeResultList", chuyenXeResultList);
+	    response.put("chuyenXeReturnList", chuyenXeReturnList);
 
 	    return ResponseEntity.ok(response);
 	}
