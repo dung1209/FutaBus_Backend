@@ -171,6 +171,75 @@ public class UserApiController {
 	    response.put("viTriGheTangTrenList", viTriGheTangTrenList);
 	    return ResponseEntity.ok(response);
 	}
+	
+	@GetMapping("/book-tickets/round-trip")
+	@ResponseBody
+	public ResponseEntity<Map<String, Object>> bookTicketsRoundTripPage(
+	        @RequestParam String departureId,
+	        @RequestParam String departure,
+	        @RequestParam String destinationId,
+	        @RequestParam String destination,
+	        @RequestParam String start,
+            @RequestParam String end,
+	        @RequestParam String departureDate,
+	        @RequestParam String returnDate,
+	        @RequestParam int idTrip,
+	        @RequestParam String startTime,
+	        @RequestParam String endTime,
+	        @RequestParam int idTripReturn,
+	        @RequestParam String startTimeReturn,
+	        @RequestParam String endTimeReturn,
+	        @RequestParam String price,
+	        @RequestParam String priceReturn,
+	        @RequestParam String soGhe,
+	        @RequestParam String soGheReturn,
+	        @RequestParam String idXe,
+	        @RequestParam String idXeReturn) {
+
+	    ViTriGheDao viTriGheDao = new ViTriGheDao();
+
+	    List<ViTriGhe> viTriGheTangDuoiGo = viTriGheDao.getViTriGheTangDuoiByIdXe(Integer.parseInt(idXe));
+	    List<ViTriGhe> viTriGheTangTrenGo = viTriGheDao.getViTriGheTangTrenByIdXe(Integer.parseInt(idXe));
+
+	    List<ViTriGhe> viTriGheTangDuoiReturn = viTriGheDao.getViTriGheTangDuoiByIdXe(Integer.parseInt(idXeReturn));
+	    List<ViTriGhe> viTriGheTangTrenReturn = viTriGheDao.getViTriGheTangTrenByIdXe(Integer.parseInt(idXeReturn));
+
+	    if (viTriGheTangDuoiGo == null) viTriGheTangDuoiGo = new ArrayList<>();
+	    if (viTriGheTangTrenGo == null) viTriGheTangTrenGo = new ArrayList<>();
+	    if (viTriGheTangDuoiReturn == null) viTriGheTangDuoiReturn = new ArrayList<>();
+	    if (viTriGheTangTrenReturn == null) viTriGheTangTrenReturn = new ArrayList<>();
+
+	    Map<String, Object> response = new HashMap<>();
+	    response.put("status", "success");
+	    response.put("departureId", departureId);
+	    response.put("departure", departure);
+	    response.put("destinationId", destinationId);
+	    response.put("destination", destination);
+	    response.put("start", start);
+	    response.put("end", end);
+	    response.put("departureDate", departureDate);
+	    response.put("returnDate", returnDate);
+
+	    response.put("idTrip", idTrip);
+	    response.put("startTime", start);
+	    response.put("endTime", end);
+	    response.put("price", price);
+	    response.put("soGhe", soGhe);
+	    response.put("idXe", idXe);
+	    response.put("viTriGheTangDuoiList", viTriGheTangDuoiGo);
+	    response.put("viTriGheTangTrenList", viTriGheTangTrenGo);
+
+	    response.put("idTripReturn", idTripReturn);
+	    response.put("startTimeReturn", startTimeReturn);
+	    response.put("endTimeReturn", endTimeReturn);
+	    response.put("priceReturn", priceReturn);
+	    response.put("soGheReturn", soGheReturn);
+	    response.put("idXeReturn", idXeReturn);
+	    response.put("viTriGheTangDuoiReturn", viTriGheTangDuoiReturn);
+	    response.put("viTriGheTangTrenReturn", viTriGheTangTrenReturn);
+
+	    return ResponseEntity.ok(response);
+	}
 
 	@GetMapping("/checkout")
 	@ResponseBody
