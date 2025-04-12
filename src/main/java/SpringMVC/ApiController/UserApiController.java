@@ -196,7 +196,7 @@ public class UserApiController {
 			@RequestParam String formattedStartTime, @RequestParam String weekday, @RequestParam int departureId,
 			@RequestParam String departure, @RequestParam int destinationId, @RequestParam String destination,
 			@RequestParam String start, @RequestParam String end, @RequestParam String departureDate,
-			@RequestParam String returnDate, @RequestParam String startTime, @RequestParam String endTime,
+			@RequestParam(required = false) String returnDate, @RequestParam String startTime, @RequestParam String endTime,
 			@RequestParam String loai, @RequestParam double price, @RequestParam int soGhe, @RequestParam Long idXe,
 			@RequestParam(required = false) Double totalPriceReturn, @RequestParam(required = false) Long idTripReturn,
 			@RequestParam(required = false) String startTimeReturn,
