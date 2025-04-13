@@ -12,22 +12,22 @@ public class NguoiDung {
     @Column(name = "idNguoiDung")
     private int idNguoiDung;
 
-    @Column(name = "hoTen", nullable = false, length = 255)
+    @Column(name = "hoTen", nullable = true, length = 255)
     private String hoTen;
 
-    @Column(name = "gioiTinh", nullable = false)
+    @Column(name = "gioiTinh", nullable = true)
     private boolean gioiTinh;
 
-    @Column(name = "namSinh", nullable = false)
+    @Column(name = "namSinh", nullable = true)
     private int namSinh;
 
-    @Column(name = "CCCD", nullable = false, length = 12)
+    @Column(name = "CCCD", nullable = true, length = 12)
     private String CCCD;
 
     @Column(name = "diaChi", nullable = true, length = 255)
     private String diaChi;
 
-    @Column(name = "soDienThoai", nullable = false, length = 10)
+    @Column(name = "soDienThoai", nullable = true, length = 10)
     private String soDienThoai;
 
     @Column(name = "email", nullable = false, length = 320)
@@ -36,7 +36,7 @@ public class NguoiDung {
     @Column(name = "matKhau", nullable = false, length = 255)
     private String matKhau;
 
-    @Column(name = "ngayDangKy", nullable = false)
+    @Column(name = "ngayDangKy", nullable = true)
     @Temporal(TemporalType.TIMESTAMP)
     private Date ngayDangKy;
 

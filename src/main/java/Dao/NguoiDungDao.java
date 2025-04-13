@@ -78,4 +78,95 @@ public class NguoiDungDao {
         }
         return total;
     }
+    public NguoiDung checkLogin(String soDienThoai, String matKhau) {
+        NguoiDung nguoiDung = null;
+        Session session = null;
+        Transaction transaction = null;
+
+        try {
+            if (factory == null) {
+                factory = HibernateUtils.getSessionFactory();
+            }
+
+            session = factory.openSession();
+            transaction = session.beginTransaction();
+
+            String hql = "from NguoiDung where soDienThoai = :soDienThoai and matKhau = :matKhau";
+            Query<NguoiDung> query = session.createQuery(hql, NguoiDung.class);
+            query.setParameter("soDienThoai", soDienThoai);
+            query.setParameter("matKhau", matKhau);
+
+            nguoiDung = query.uniqueResult();
+
+            transaction.commit();
+        } catch (Exception e) {
+            if (transaction != null) transaction.rollback();
+            e.printStackTrace();
+        } finally {
+            if (session != null) session.close();
+        }
+
+        return nguoiDung;
+    }
+    public boolean checkEmailExists(String email) {
+        Session session = null;
+        Transaction transaction = null;
+        boolean exists = false;
+
+        try {
+            if (factory == null) {
+                factory = HibernateUtils.getSessionFactory();
+            }
+            session = factory.openSession();
+            transaction = session.beginTransaction();
+
+            String hql = "select count(*) from NguoiDung where email = :email";
+            Query<Long> query = session.createQuery(hql, Long.class);
+            query.setParameter("email", email);
+            Long count = query.uniqueResult();
+
+            exists = count != null && count > 0;
+
+            transaction.commit();
+        } catch (Exception e) {
+            if (transaction != null) {
+                transaction.rollback();
+            }
+            e.printStackTrace();
+        } finally {
+            if (session != null) {
+                session.close();
+            }
+        }
+
+        return exists;
+    }
+
+    public void save(NguoiDung nguoiDung) {
+        Session session = null;
+        Transaction transaction = null;
+
+        try {
+            if (factory == null) {
+                factory = HibernateUtils.getSessionFactory();
+            }
+            session = factory.openSession();
+            transaction = session.beginTransaction();
+
+            session.save(nguoiDung);
+
+            transaction.commit();
+        } catch (Exception e) {
+            if (transaction != null) {
+                transaction.rollback();
+            }
+            e.printStackTrace();
+            throw new RuntimeException("Lỗi khi lưu người dùng: " + e.getMessage());
+        } finally {
+            if (session != null) {
+                session.close();
+            }
+        }
+    }
+    
 }

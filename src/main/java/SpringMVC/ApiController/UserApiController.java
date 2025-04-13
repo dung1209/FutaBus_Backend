@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Random;
 import java.util.stream.Collectors;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -16,7 +17,10 @@ import java.time.format.DateTimeFormatter;
 
 import javax.servlet.http.HttpSession;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -46,20 +50,25 @@ import FutaBus.bean.BookingRequest;
 import FutaBus.bean.ChuyenXe;
 import FutaBus.bean.ChuyenXeResult;
 import FutaBus.bean.NguoiDung;
+import FutaBus.bean.OtpRequest;
 import FutaBus.bean.QuanHuyen;
 import FutaBus.bean.TinhThanh;
 import FutaBus.bean.TuyenXe;
+import FutaBus.bean.VerifyOtpRequest;
 import FutaBus.bean.ViTriGhe;
 import FutaBus.bean.Xe;
 import FutaBus.bean.LoaiXe;
+import FutaBus.bean.LoginRequest;
+
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 
-@CrossOrigin(origins = "http://localhost:8086")
+@CrossOrigin(origins = "*")
 @RestController
 @RequestMapping("/api/user")
 public class UserApiController {
-	
+	@Autowired
+    private JavaMailSender mailSender;
 	@GetMapping("/tinhthanh")
     public Map<String, Object> getTinhThanh() {
 
@@ -269,5 +278,163 @@ public class UserApiController {
 
 	    return ResponseEntity.ok(response);
 	}
+	@PostMapping("/login")
+	@ResponseBody
+	public ResponseEntity<Map<String, Object>> login(@RequestBody LoginRequest loginRequest, HttpSession session) {
+	    System.out.println("Nhận yêu cầu đăng nhập từ client:");
+	    System.out.println("soDienThoai: " + loginRequest.getSoDienThoai());
+	    System.out.println("matKhau: " + loginRequest.getMatKhau());
 
+	    NguoiDungDao nguoiDungDao = new NguoiDungDao();
+	    NguoiDung nguoiDung = null;
+	    Map<String, Object> response = new HashMap<>();
+
+	    try {
+	        System.out.println("Bắt đầu kiểm tra đăng nhập...");
+	        nguoiDung = nguoiDungDao.checkLogin(loginRequest.getSoDienThoai(), loginRequest.getMatKhau());
+	        System.out.println("Kiểm tra đăng nhập hoàn tất!");
+	    } catch (Exception e) {
+	        System.out.println("Lỗi khi kiểm tra đăng nhập: " + e.getMessage());
+	        response.put("status", "error");
+	        response.put("message", "Lỗi server: " + e.getMessage());
+	        return ResponseEntity.status(500).body(response);
+	    }
+
+	    if (nguoiDung != null) {
+	        System.out.println("Đăng nhập thành công!");
+	        System.out.println("idNguoiDung: " + nguoiDung.getIdNguoiDung());
+	        System.out.println("hoTen: " + nguoiDung.getHoTen());
+	        System.out.println("idPhanQuyen: " + nguoiDung.getIdPhanQuyen());
+
+	        session.setAttribute("currentUser", nguoiDung);
+
+	        response.put("status", "success");
+	        response.put("message", "Đăng nhập thành công!");
+	        response.put("nguoiDung", Map.of(
+	            "idNguoiDung", nguoiDung.getIdNguoiDung(),
+	            "hoTen", nguoiDung.getHoTen(),
+	            "idPhanQuyen", nguoiDung.getIdPhanQuyen()
+	        ));
+	    } else {
+	        System.out.println("Đăng nhập thất bại - sai thông tin!");
+	        response.put("status", "error");
+	        response.put("message", "Sai tên đăng nhập hoặc mật khẩu");
+	    }
+
+	    return ResponseEntity.ok(response);
+	}
+
+	@PostMapping("/send-otp")
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> sendOtp(@RequestBody OtpRequest otpRequest, HttpSession session) {
+        String email = otpRequest.getEmail();
+        Map<String, Object> response = new HashMap<>();
+
+        if (email == null || email.trim().isEmpty()) {
+            response.put("success", false);
+            response.put("message", "Email không được để trống");
+            return ResponseEntity.badRequest().body(response);
+        }
+
+        NguoiDungDao nguoiDungDao = new NguoiDungDao();
+        if (nguoiDungDao.checkEmailExists(email)) {
+            response.put("success", false);
+            response.put("message", "Email đã được đăng ký");
+            return ResponseEntity.badRequest().body(response);
+        }
+
+        String otp = generateOTP();
+        try {
+            boolean emailSent = sendEmailWithOTP(email, otp);
+            if (emailSent) {
+                session.setAttribute("otp", otp);
+                session.setAttribute("email", email);
+                response.put("success", true);
+                response.put("message", "OTP đã được gửi đến email");
+                return ResponseEntity.ok(response);
+            } else {
+                response.put("success", false);
+                response.put("message", "Không thể gửi email OTP");
+                return ResponseEntity.badRequest().body(response);
+            }
+        } catch (Exception e) {
+            response.put("success", false);
+            response.put("message", "Lỗi khi gửi OTP: " + e.getMessage());
+            return ResponseEntity.status(500).body(response);
+        }
+    }
+
+	@PostMapping("/verify-otp")
+	@ResponseBody
+	public ResponseEntity<Map<String, Object>> verifyOtp(@RequestBody VerifyOtpRequest verifyOtpRequest, HttpSession session) {
+	    String email = verifyOtpRequest.getEmail();
+	    String otp = verifyOtpRequest.getOtp();
+	    String hoTen = verifyOtpRequest.getHoTen();
+	    String soDienThoai = verifyOtpRequest.getSoDienThoai();
+	    String matKhau = verifyOtpRequest.getMatKhau();
+	    String sessionOtp = (String) session.getAttribute("otp");
+	    String sessionEmail = (String) session.getAttribute("email");
+	    Map<String, Object> response = new HashMap<>();
+
+	    if (email == null || otp == null || hoTen == null || soDienThoai == null || matKhau == null ||
+	        email.trim().isEmpty() || otp.trim().isEmpty() || hoTen.trim().isEmpty() ||
+	        soDienThoai.trim().isEmpty() || matKhau.trim().isEmpty()) {
+	        response.put("success", false);
+	        response.put("message", "Thông tin không được để trống");
+	        return ResponseEntity.badRequest().body(response);
+	    }
+
+	    if (sessionOtp == null || sessionEmail == null || !sessionEmail.equals(email) || !sessionOtp.equals(otp)) {
+	        response.put("success", false);
+	        response.put("message", "OTP không đúng hoặc đã hết hạn");
+	        return ResponseEntity.badRequest().body(response);
+	    }
+
+	    NguoiDungDao nguoiDungDao = new NguoiDungDao();
+	    NguoiDung nguoiDung = new NguoiDung();
+	    nguoiDung.setEmail(email);
+	    nguoiDung.setHoTen(hoTen);
+	    nguoiDung.setSoDienThoai(soDienThoai);
+	    nguoiDung.setMatKhau(matKhau);
+	    nguoiDung.setIdPhanQuyen(1);
+
+	    try {
+	        nguoiDungDao.save(nguoiDung);
+	        session.removeAttribute("otp");
+	        session.removeAttribute("email");
+	        response.put("success", true);
+	        response.put("message", "Đăng ký thành công!");
+	    } catch (Exception e) {
+	        response.put("success", false);
+	        response.put("message", "Lỗi khi đăng ký: " + e.getMessage());
+	        return ResponseEntity.status(500).body(response);
+	    }
+
+	    return ResponseEntity.ok(response);
+	}
+
+    private String generateOTP() {
+        Random random = new Random();
+        return String.format("%06d", random.nextInt(1000000));
+    }
+
+    private boolean sendEmailWithOTP(String email, String otp) {
+        String subject = "FutaBus - Xác nhận đăng ký";
+        String body = "Mã OTP của bạn là: " + otp + "\nVui lòng sử dụng mã này để hoàn tất đăng ký.";
+        try {
+            sendEmail(email, subject, body);
+            return true;
+        } catch (Exception e) {
+            System.out.println("Gửi email thất bại: " + e.getMessage());
+            return false;
+        }
+    }
+
+    private void sendEmail(String to, String subject, String body) {
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setTo(to);
+        message.setSubject(subject);
+        message.setText(body);
+        mailSender.send(message);
+    }
 }

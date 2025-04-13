@@ -12,10 +12,10 @@
 		</property>
 
 		<property name="hibernate.connection.url">
-			jdbc:sqlserver://ADMIN-PC;databaseName=futabus_booking_db
+			jdbc:sqlserver://DESKTOP-BMS5ORI;databaseName=futabus_booking_db
 		</property>
 		<property name="hibernate.connection.username">sa</property>
-        <property name="hibernate.connection.password">123</property>
+        <property name="hibernate.connection.password">123456</property>
 
 		<property name="connection.pool_size">100</property>
 		<property name="hibernate.dialect">
