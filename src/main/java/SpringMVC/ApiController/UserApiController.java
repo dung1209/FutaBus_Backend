@@ -47,6 +47,7 @@ import Dao.ViTriGheDao;
 import Dao.XeDao;
 import FutaBus.bean.BenXe;
 import FutaBus.bean.BookingRequest;
+import FutaBus.bean.BookingWrapper;
 import FutaBus.bean.ChuyenXe;
 import FutaBus.bean.ChuyenXeResult;
 import FutaBus.bean.NguoiDung;
@@ -67,216 +68,228 @@ import java.nio.charset.StandardCharsets;
 @RestController
 @RequestMapping("/api/user")
 public class UserApiController {
+
 	@Autowired
     private JavaMailSender mailSender;
+
 	@GetMapping("/tinhthanh")
-    public Map<String, Object> getTinhThanh() {
+	public Map<String, Object> getTinhThanh() {
 
 		TinhThanhDao tinhThanhDao = new TinhThanhDao();
-        List<TinhThanh> tinhThanhList = tinhThanhDao.getAllTinhThanh();
+		List<TinhThanh> tinhThanhList = tinhThanhDao.getAllTinhThanh();
 
-        return Map.of(
-            "tinhThanhList", tinhThanhList
-        );
-    }
-	
+		return Map.of("tinhThanhList", tinhThanhList);
+	}
+
 	@GetMapping("/trip-selection")
 	@ResponseBody
-	public ResponseEntity<Map<String, Object>> tripSelectionPage(
-			@RequestParam int departureId,
-	        @RequestParam String departure,
-	        @RequestParam int destinationId,
-	        @RequestParam String destination,
-	        @RequestParam String departureDate,
-	        @RequestParam(required = false) String returnDate,
-	        @RequestParam int tickets) {
-	    
-	    DateTimeFormatter inputFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-        DateTimeFormatter outputFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+	public ResponseEntity<Map<String, Object>> tripSelectionPage(@RequestParam int departureId,
+			@RequestParam String departure, @RequestParam int destinationId, @RequestParam String destination,
+			@RequestParam String departureDate, @RequestParam(required = false) String returnDate,
+			@RequestParam int tickets) {
 
-        LocalDate date = LocalDate.parse(departureDate, inputFormatter);
-        String formattedDate = date.format(outputFormatter);
-	    
-	    ChuyenXeDao chuyenXeDao = new ChuyenXeDao();
-	    List<ChuyenXeResult> chuyenXeResultList = chuyenXeDao.getChuyenXe(departureId, destinationId, formattedDate, tickets);
-	    int numberOfTrips = chuyenXeResultList.size();
-	    
-	    List<ChuyenXeResult> chuyenXeReturnList = new ArrayList<>();
-	    int numberOfTripReturns = chuyenXeReturnList.size();
-	    
-	    if (returnDate != null && !returnDate.trim().isEmpty()) {
-	        LocalDate dateReturn = LocalDate.parse(returnDate, inputFormatter);
-	        String formattedDateReturn = dateReturn.format(outputFormatter);
-	        chuyenXeReturnList = chuyenXeDao.getChuyenXe(destinationId, departureId, formattedDateReturn, tickets);
-	        numberOfTripReturns = chuyenXeReturnList.size();
-	    }
+		DateTimeFormatter inputFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+		DateTimeFormatter outputFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
-	    Map<String, Object> response = new HashMap<>();
-	    response.put("status", "success");
-	    response.put("departureId", departureId);
-	    response.put("departure", departure);
-	    response.put("destinationId", destinationId);
-	    response.put("destination", destination);
-	    response.put("departureDate", departureDate);
-	    response.put("returnDate", returnDate);
-	    response.put("tickets", tickets);
-	    response.put("numberOfTrips", numberOfTrips);
-	    response.put("numberOfTripReturns", numberOfTripReturns);
-	    response.put("chuyenXeResultList", chuyenXeResultList);
-	    response.put("chuyenXeReturnList", chuyenXeReturnList);
+		LocalDate date = LocalDate.parse(departureDate, inputFormatter);
+		String formattedDate = date.format(outputFormatter);
 
-	    return ResponseEntity.ok(response);
+		ChuyenXeDao chuyenXeDao = new ChuyenXeDao();
+		List<ChuyenXeResult> chuyenXeResultList = chuyenXeDao.getChuyenXe(departureId, destinationId, formattedDate,
+				tickets);
+		int numberOfTrips = chuyenXeResultList.size();
+
+		List<ChuyenXeResult> chuyenXeReturnList = new ArrayList<>();
+		int numberOfTripReturns = chuyenXeReturnList.size();
+
+		if (returnDate != null && !returnDate.trim().isEmpty()) {
+			LocalDate dateReturn = LocalDate.parse(returnDate, inputFormatter);
+			String formattedDateReturn = dateReturn.format(outputFormatter);
+			chuyenXeReturnList = chuyenXeDao.getChuyenXe(destinationId, departureId, formattedDateReturn, tickets);
+			numberOfTripReturns = chuyenXeReturnList.size();
+		}
+
+		Map<String, Object> response = new HashMap<>();
+		response.put("status", "success");
+		response.put("departureId", departureId);
+		response.put("departure", departure);
+		response.put("destinationId", destinationId);
+		response.put("destination", destination);
+		response.put("departureDate", departureDate);
+		response.put("returnDate", returnDate);
+		response.put("tickets", tickets);
+		response.put("numberOfTrips", numberOfTrips);
+		response.put("numberOfTripReturns", numberOfTripReturns);
+		response.put("chuyenXeResultList", chuyenXeResultList);
+		response.put("chuyenXeReturnList", chuyenXeReturnList);
+
+		return ResponseEntity.ok(response);
 	}
-	
+
 	@GetMapping("/book-tickets")
 	@ResponseBody
-	public ResponseEntity<Map<String, Object>> bookTicketsPage(
-	        @RequestParam int departureId,
-	        @RequestParam String departure,
-	        @RequestParam int destinationId,
-	        @RequestParam String destination,
-	        @RequestParam String start,
-	        @RequestParam String end,
-	        @RequestParam String departureDate,
-	        @RequestParam(required = false) String returnDate, 
-	        @RequestParam int idTrip,
-	        @RequestParam String startTime,
-	        @RequestParam String endTime,
-	        @RequestParam String loai,
-	        @RequestParam String price,
-	        @RequestParam int soGhe,
-	        @RequestParam int idXe) {
-	    
-	    ViTriGheDao viTriGheDao = new ViTriGheDao();
-	    List<ViTriGhe> viTriGheTangDuoiList = viTriGheDao.getViTriGheTangDuoiByIdXe(idXe);
-	    List<ViTriGhe> viTriGheTangTrenList = viTriGheDao.getViTriGheTangTrenByIdXe(idXe);
-	    
-	    if (viTriGheTangDuoiList == null) {
-	        viTriGheTangDuoiList = new ArrayList<>();
-	    }
+	public ResponseEntity<Map<String, Object>> bookTicketsPage(@RequestParam String departureId,
+			@RequestParam String departure, @RequestParam String destinationId, @RequestParam String destination,
+			@RequestParam String start, @RequestParam String end, @RequestParam String departureDate,
+			@RequestParam(required = false) String returnDate, @RequestParam String idTrip,
+			@RequestParam String startTime, @RequestParam String endTime, @RequestParam String loai,
+			@RequestParam String price, @RequestParam String soGhe, @RequestParam String idXe,
+			@RequestParam(required = false) String idTripReturn, @RequestParam(required = false) String startTimeReturn,
+			@RequestParam(required = false) String endTimeReturn, @RequestParam(required = false) String priceReturn,
+			@RequestParam(required = false) String soGheReturn, @RequestParam(required = false) String idXeReturn) {
 
-	    if (viTriGheTangTrenList == null) {
-	        viTriGheTangTrenList = new ArrayList<>();
-	    }
+		ViTriGheDao viTriGheDao = new ViTriGheDao();
 
-	    Map<String, Object> response = new HashMap<>();
-	    response.put("status", "success");
-	    response.put("departureId", departureId);
-	    response.put("departure", departure);
-	    response.put("destinationId", destinationId);
-	    response.put("destination", destination);
-	    response.put("departureDate", departureDate);
-	    response.put("returnDate", returnDate);
-	    response.put("start", start);
-	    response.put("end", end);
-	    response.put("idTrip", idTrip);
-	    response.put("startTime", startTime);
-	    response.put("endTime", endTime);
-	    response.put("loai", loai);
-	    response.put("price", price);
-	    response.put("soGhe", soGhe);
-	    response.put("idXe", idXe);
-	    response.put("viTriGheTangDuoiList", viTriGheTangDuoiList);
-	    response.put("viTriGheTangTrenList", viTriGheTangTrenList);
-	    return ResponseEntity.ok(response);
+		int idXeInt = parseIntSafe(idXe);
+		List<ViTriGhe> viTriGheTangDuoiGo = viTriGheDao.getViTriGheTangDuoiByIdXe(idXeInt);
+		List<ViTriGhe> viTriGheTangTrenGo = viTriGheDao.getViTriGheTangTrenByIdXe(idXeInt);
+
+		List<ViTriGhe> viTriGheTangDuoiReturn = new ArrayList<>();
+		List<ViTriGhe> viTriGheTangTrenReturn = new ArrayList<>();
+
+		if (returnDate != null && !returnDate.trim().isEmpty() && idXeReturn != null) {
+			int idXeReturnInt = parseIntSafe(idXeReturn);
+			viTriGheTangDuoiReturn = viTriGheDao.getViTriGheTangDuoiByIdXe(idXeReturnInt);
+			viTriGheTangTrenReturn = viTriGheDao.getViTriGheTangTrenByIdXe(idXeReturnInt);
+		}
+
+		Map<String, Object> response = new HashMap<>();
+		response.put("status", "success");
+
+		response.put("departureId", departureId);
+		response.put("departure", departure);
+		response.put("destinationId", destinationId);
+		response.put("destination", destination);
+		response.put("departureDate", departureDate);
+		response.put("start", start);
+		response.put("end", end);
+		response.put("idTrip", idTrip);
+		response.put("startTime", startTime);
+		response.put("endTime", endTime);
+		response.put("loai", loai);
+		response.put("price", price);
+		response.put("soGhe", soGhe);
+		response.put("idXe", idXe);
+		response.put("viTriGheTangDuoiList", viTriGheTangDuoiGo);
+		response.put("viTriGheTangTrenList", viTriGheTangTrenGo);
+
+		if (returnDate != null && !returnDate.trim().isEmpty()) {
+			response.put("returnDate", returnDate);
+			response.put("idTripReturn", idTripReturn);
+			response.put("startTimeReturn", startTimeReturn);
+			response.put("endTimeReturn", endTimeReturn);
+			response.put("priceReturn", priceReturn);
+			response.put("soGheReturn", soGheReturn);
+			response.put("idXeReturn", idXeReturn);
+			response.put("viTriGheTangDuoiReturnList", viTriGheTangDuoiReturn);
+			response.put("viTriGheTangTrenReturnList", viTriGheTangTrenReturn);
+		}
+
+		return ResponseEntity.ok(response);
+	}
+
+	private int parseIntSafe(String s) {
+		try {
+			return Integer.parseInt(s);
+		} catch (Exception e) {
+			return 0;
+		}
 	}
 
 	@GetMapping("/checkout")
 	@ResponseBody
-	public ResponseEntity<Map<String, Object>> checkoutPage(
-	        @RequestParam int selectedSeatsCount,
-	        @RequestParam double totalPrice,
-	        @RequestParam String nameValue,
-	        @RequestParam String phoneValue,
-	        @RequestParam String emailValue,
-	        @RequestParam String selectedSeats,
-	        @RequestParam String selectedSeatIds,
-	        @RequestParam Long idTrip,
-	        @RequestParam String formattedStartTime,
-	        @RequestParam String weekday,
-	        @RequestParam int departureId,
-	        @RequestParam String departure,
-	        @RequestParam int destinationId,
-	        @RequestParam String destination,
-	        @RequestParam String start,
-	        @RequestParam String end,
-	        @RequestParam String departureDate,
-	        @RequestParam String returnDate,
-	        @RequestParam String startTime,
-	        @RequestParam String endTime,
-	        @RequestParam String loai,
-	        @RequestParam double price,
-	        @RequestParam int soGhe,
-	        @RequestParam Long idXe) {
-		
-	    Map<String, Object> response = new HashMap<>();
-	    response.put("status", "success");
-	    response.put("selectedSeatsCount", selectedSeatsCount);
-	    response.put("totalPrice", totalPrice);
-	    response.put("nameValue", nameValue);
-	    response.put("phoneValue", phoneValue);
-	    response.put("emailValue", emailValue);
-	    response.put("selectedSeats", selectedSeats);
-	    response.put("selectedSeatIds", selectedSeatIds);
-	    response.put("idTrip", idTrip);
-	    response.put("formattedStartTime", formattedStartTime);
-	    response.put("weekday", weekday);
-	    response.put("departureId", departureId);
-	    response.put("departure", departure);
-	    response.put("destinationId", destinationId);
-	    response.put("destination", destination);
-	    response.put("start", start);
-	    response.put("end", end);
-	    response.put("departureDate", departureDate);
-	    response.put("returnDate", returnDate);
-	    response.put("startTime", startTime);
-	    response.put("endTime", endTime);
-	    response.put("loai", loai);
-	    response.put("price", price);
-	    response.put("soGhe", soGhe);
-	    response.put("idXe", idXe);
+	public ResponseEntity<Map<String, Object>> checkoutPage(@RequestParam int selectedSeatsCount,
+			@RequestParam(required = false) Integer selectedSeatsCountReturn, @RequestParam double totalPrice,
+			@RequestParam String nameValue, @RequestParam String phoneValue, @RequestParam String emailValue,
+			@RequestParam String selectedSeats, @RequestParam String selectedSeatIds,
+			@RequestParam(required = false) String selectedSeatsReturn,
+			@RequestParam(required = false) String selectedSeatIdsReturn, @RequestParam Long idTrip,
+			@RequestParam String formattedStartTime, @RequestParam String weekday, @RequestParam int departureId,
+			@RequestParam String departure, @RequestParam int destinationId, @RequestParam String destination,
+			@RequestParam String start, @RequestParam String end, @RequestParam String departureDate,
+			@RequestParam(required = false) String returnDate, @RequestParam String startTime, @RequestParam String endTime,
+			@RequestParam String loai, @RequestParam double price, @RequestParam int soGhe, @RequestParam Long idXe,
+			@RequestParam(required = false) Double totalPriceReturn, @RequestParam(required = false) Long idTripReturn,
+			@RequestParam(required = false) String startTimeReturn,
+			@RequestParam(required = false) String endTimeReturn,
+			@RequestParam(required = false) String formattedStartTimeReturn,
+			@RequestParam(required = false) Double priceReturn, @RequestParam(required = false) Integer soGheReturn,
+			@RequestParam(required = false) Long idXeReturn) {
 
-	    return ResponseEntity.ok(response);
+		Map<String, Object> response = new HashMap<>();
+		response.put("status", "success");
+		response.put("selectedSeatsCount", selectedSeatsCount);
+		response.put("selectedSeatsCountReturn", selectedSeatsCountReturn);
+		response.put("totalPrice", totalPrice);
+		response.put("nameValue", nameValue);
+		response.put("phoneValue", phoneValue);
+		response.put("emailValue", emailValue);
+		response.put("selectedSeats", selectedSeats);
+		response.put("selectedSeatIds", selectedSeatIds);
+		response.put("selectedSeatsReturn", selectedSeatsReturn);
+		response.put("selectedSeatIdsReturn", selectedSeatIdsReturn);
+		response.put("idTrip", idTrip);
+		response.put("formattedStartTime", formattedStartTime);
+		response.put("weekday", weekday);
+		response.put("departureId", departureId);
+		response.put("departure", departure);
+		response.put("destinationId", destinationId);
+		response.put("destination", destination);
+		response.put("start", start);
+		response.put("end", end);
+		response.put("departureDate", departureDate);
+		response.put("returnDate", returnDate);
+		response.put("startTime", startTime);
+		response.put("endTime", endTime);
+		response.put("loai", loai);
+		response.put("price", price);
+		response.put("soGhe", soGhe);
+		response.put("idXe", idXe);
+		response.put("totalPriceReturn", totalPriceReturn);
+		response.put("idTripReturn", idTripReturn);
+		response.put("startTimeReturn", startTimeReturn);
+		response.put("endTimeReturn", endTimeReturn);
+		response.put("formattedStartTimeReturn", formattedStartTimeReturn);
+		response.put("priceReturn", priceReturn);
+		response.put("soGheReturn", soGheReturn);
+		response.put("idXeReturn", idXeReturn);
+
+		return ResponseEntity.ok(response);
 	}
 
 	@PostMapping("/confirmBooking")
 	@ResponseBody
-	public ResponseEntity<Map<String, Object>> confirmBooking(@RequestBody BookingRequest bookingRequest) {
-		
+	public ResponseEntity<Map<String, Object>> confirmBooking(@RequestBody BookingWrapper wrapper) {
+
+		BookingRequest go = wrapper.getBookingData();
+		BookingRequest back = wrapper.getBookingDataReturn();
+
 		LocalDateTime now = LocalDateTime.now();
-	    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-	    String formattedDateTime = now.format(formatter);
-	    
-	    System.out.println("Nhận dữ liệu đặt vé từ client:");
-	    System.out.println("thoiGianDatVe: " + formattedDateTime);
-	    System.out.println("soLuongVe: " + bookingRequest.getSoLuongVe());
-	    System.out.println("tongTien: " + bookingRequest.getTongTien());
-	    //System.out.println("trangThai: " + bookingRequest.getTongTien());
-	    System.out.println("thoiGianCapNhat: " + formattedDateTime);
-	    System.out.println("hoTen: " + bookingRequest.getHoTen());
-	    System.out.println("soDienThoai: " + bookingRequest.getSoDienThoai());
-	    System.out.println("email: " + bookingRequest.getEmail());
-	    //System.out.println("idNguoiDung: " + bookingRequest.getEmail());
-	    System.out.println("idChuyenXe: " + bookingRequest.getIdChuyenXe());
-	    
-	    String idViTriGheStr = bookingRequest.getIdViTriGhe(); // "1007,1008"
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+		String formattedDateTime = now.format(formatter);
 
-	    List<Integer> gheList = Arrays.stream(idViTriGheStr.split(","))
-	                                  .map(Integer::parseInt)
-	                                  .collect(Collectors.toList());
-	    System.out.println("gheList: " + gheList);
-	    //System.out.println("trangThai: " + bookingRequest.getIdViTriGhe());
-	    System.out.println("idViTriGhe: " + bookingRequest.getIdViTriGhe());
-	   //System.out.println("idPhieuDatVe: " + bookingRequest.getIdViTriGhe());
-	    
-	    PhieuDatVeDao phieuDatVeDao = new PhieuDatVeDao();
-	    phieuDatVeDao.saveBooking(bookingRequest);
+		String idViTriGheStr = go.getIdViTriGhe();
 
-	    Map<String, Object> response = new HashMap<>();
-	    response.put("status", "success");
-	    response.put("message", "Đặt vé thành công!");
+		List<Integer> gheList = Arrays.stream(idViTriGheStr.split(",")).map(Integer::parseInt)
+				.collect(Collectors.toList());
 
-	    return ResponseEntity.ok(response);
+		PhieuDatVeDao phieuDatVeDao = new PhieuDatVeDao();
+		phieuDatVeDao.saveBooking(go);
+
+		if (back != null && back.getIdViTriGhe() != null && !back.getIdViTriGhe().isEmpty()) {
+			String idViTriGheReturnStr = back.getIdViTriGhe();
+			List<Integer> gheReturnList = Arrays.stream(idViTriGheReturnStr.split(",")).map(Integer::parseInt)
+					.collect(Collectors.toList());
+
+			PhieuDatVeDao phieuDatVeReturnDao = new PhieuDatVeDao();
+			phieuDatVeReturnDao.saveBooking(back);
+		}
+
+		Map<String, Object> response = new HashMap<>();
+		response.put("status", "success");
+		response.put("message", "Đặt vé thành công!");
+
+		return ResponseEntity.ok(response);
 	}
 	@PostMapping("/login")
 	@ResponseBody
@@ -437,4 +450,5 @@ public class UserApiController {
         message.setText(body);
         mailSender.send(message);
     }
+
 }
