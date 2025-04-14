@@ -78,7 +78,7 @@ public class NguoiDungDao {
         }
         return total;
     }
-    public NguoiDung checkLogin(String soDienThoai, String matKhau) {
+    public NguoiDung checkLogin(String email, String matKhau) {
         NguoiDung nguoiDung = null;
         Session session = null;
         Transaction transaction = null;
@@ -91,9 +91,9 @@ public class NguoiDungDao {
             session = factory.openSession();
             transaction = session.beginTransaction();
 
-            String hql = "from NguoiDung where soDienThoai = :soDienThoai and matKhau = :matKhau";
+            String hql = "from NguoiDung where email = :email and matKhau = :matKhau";
             Query<NguoiDung> query = session.createQuery(hql, NguoiDung.class);
-            query.setParameter("soDienThoai", soDienThoai);
+            query.setParameter("email", email);
             query.setParameter("matKhau", matKhau);
 
             nguoiDung = query.uniqueResult();

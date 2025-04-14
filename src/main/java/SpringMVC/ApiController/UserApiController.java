@@ -295,7 +295,7 @@ public class UserApiController {
 	@ResponseBody
 	public ResponseEntity<Map<String, Object>> login(@RequestBody LoginRequest loginRequest, HttpSession session) {
 	    System.out.println("Nhận yêu cầu đăng nhập từ client:");
-	    System.out.println("soDienThoai: " + loginRequest.getSoDienThoai());
+	    System.out.println("email: " + loginRequest.getEmail());
 	    System.out.println("matKhau: " + loginRequest.getMatKhau());
 
 	    NguoiDungDao nguoiDungDao = new NguoiDungDao();
@@ -304,7 +304,7 @@ public class UserApiController {
 
 	    try {
 	        System.out.println("Bắt đầu kiểm tra đăng nhập...");
-	        nguoiDung = nguoiDungDao.checkLogin(loginRequest.getSoDienThoai(), loginRequest.getMatKhau());
+	        nguoiDung = nguoiDungDao.checkLogin(loginRequest.getEmail(), loginRequest.getMatKhau());
 	        System.out.println("Kiểm tra đăng nhập hoàn tất!");
 	    } catch (Exception e) {
 	        System.out.println("Lỗi khi kiểm tra đăng nhập: " + e.getMessage());
