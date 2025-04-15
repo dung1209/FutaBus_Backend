@@ -316,7 +316,6 @@ public class UserApiController {
 	    if (nguoiDung != null) {
 	        System.out.println("Đăng nhập thành công!");
 	        System.out.println("idNguoiDung: " + nguoiDung.getIdNguoiDung());
-	        System.out.println("hoTen: " + nguoiDung.getHoTen());
 	        System.out.println("idPhanQuyen: " + nguoiDung.getIdPhanQuyen());
 
 	        session.setAttribute("currentUser", nguoiDung);
@@ -325,7 +324,6 @@ public class UserApiController {
 	        response.put("message", "Đăng nhập thành công!");
 	        response.put("nguoiDung", Map.of(
 	            "idNguoiDung", nguoiDung.getIdNguoiDung(),
-	            "hoTen", nguoiDung.getHoTen(),
 	            "idPhanQuyen", nguoiDung.getIdPhanQuyen()
 	        ));
 	    } else {
@@ -337,6 +335,8 @@ public class UserApiController {
 	    return ResponseEntity.ok(response);
 	}
 
+	 
+	
 	@PostMapping("/send-otp")
     @ResponseBody
     public ResponseEntity<Map<String, Object>> sendOtp(@RequestBody OtpRequest otpRequest, HttpSession session) {
@@ -364,6 +364,7 @@ public class UserApiController {
                 session.setAttribute("email", email);
                 response.put("success", true);
                 response.put("message", "OTP đã được gửi đến email");
+                System.out.println("OTP đã gửi: " + otp + " | Email: " + email + " | Session: " + session.getId());
                 return ResponseEntity.ok(response);
             } else {
                 response.put("success", false);
@@ -382,16 +383,13 @@ public class UserApiController {
 	public ResponseEntity<Map<String, Object>> verifyOtp(@RequestBody VerifyOtpRequest verifyOtpRequest, HttpSession session) {
 	    String email = verifyOtpRequest.getEmail();
 	    String otp = verifyOtpRequest.getOtp();
-	    String hoTen = verifyOtpRequest.getHoTen();
-	    String soDienThoai = verifyOtpRequest.getSoDienThoai();
-	    String matKhau = verifyOtpRequest.getMatKhau();
 	    String sessionOtp = (String) session.getAttribute("otp");
 	    String sessionEmail = (String) session.getAttribute("email");
 	    Map<String, Object> response = new HashMap<>();
+	    System.out.println("OTP kiểm tra: " + otp + " | Email: " + email);
+	    System.out.println("OTP trong session: " + session.getAttribute("otp") + " | Email session: " + session.getAttribute("email") + " | Session: " + session.getId());
 
-	    if (email == null || otp == null || hoTen == null || soDienThoai == null || matKhau == null ||
-	        email.trim().isEmpty() || otp.trim().isEmpty() || hoTen.trim().isEmpty() ||
-	        soDienThoai.trim().isEmpty() || matKhau.trim().isEmpty()) {
+	    if (email == null || otp == null ||email.trim().isEmpty() || otp.trim().isEmpty()) {
 	        response.put("success", false);
 	        response.put("message", "Thông tin không được để trống");
 	        return ResponseEntity.badRequest().body(response);
@@ -406,9 +404,8 @@ public class UserApiController {
 	    NguoiDungDao nguoiDungDao = new NguoiDungDao();
 	    NguoiDung nguoiDung = new NguoiDung();
 	    nguoiDung.setEmail(email);
-	    nguoiDung.setHoTen(hoTen);
-	    nguoiDung.setSoDienThoai(soDienThoai);
-	    nguoiDung.setMatKhau(matKhau);
+	    nguoiDung.setMatKhau("123");
+	    nguoiDung.setTrangThai(1);
 	    nguoiDung.setIdPhanQuyen(1);
 
 	    try {
