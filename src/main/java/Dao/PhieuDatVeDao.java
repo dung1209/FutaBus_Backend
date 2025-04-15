@@ -27,7 +27,7 @@ public class PhieuDatVeDao {
     
     private static SessionFactory factory = HibernateUtils.getSessionFactory();
     
-    public void saveBooking(BookingRequest bookingRequest) {
+    public void saveBooking(BookingRequest bookingRequest, int idNguoiDung) {
         Session session = HibernateUtils.getSessionFactory().openSession();
         Transaction tx = null;
 
@@ -42,7 +42,7 @@ public class PhieuDatVeDao {
             phieu.setHoTen(bookingRequest.getHoTen());
             phieu.setSoDienThoai(bookingRequest.getSoDienThoai());
             phieu.setEmail(bookingRequest.getEmail());
-            phieu.setIdNguoiDung(1);
+            phieu.setIdNguoiDung(idNguoiDung);
             phieu.setIdChuyenXe(bookingRequest.getIdChuyenXe());
             phieu.setTrangThai(1);
 

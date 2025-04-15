@@ -1,33 +1,40 @@
 package FutaBus.bean;
 
 public class LoginRequest {
-    private String soDienThoai;
+    private String email;
     private String matKhau;
 
 
     public LoginRequest() {
 	}
 
-	public LoginRequest(String soDienThoai, String matKhau) {
+
+	public LoginRequest(String email, String matKhau) {
 		super();
-		this.soDienThoai = soDienThoai;
+		this.email = email;
 		this.matKhau = matKhau;
 	}
 
-	public String getSoDienThoai() {
-        return soDienThoai;
-    }
 
-    public void setSoDienThoai(String soDienThoai) {
-        this.soDienThoai = soDienThoai;
-    }
+	public String getEmail() {
+		return email;
+	}
 
-    public String getMatKhau() {
-        return matKhau;
-    }
 
-    public void setMatKhau(String matKhau) {
-        this.matKhau = matKhau;
-    }
+	public void setEmail(String email) {
+		this.email = email;
+	}
+
+
+	public String getMatKhau() {
+		return matKhau;
+	}
+
+
+	public void setMatKhau(String matKhau) {
+		this.matKhau = matKhau;
+	}
+
+	
 }
 

@@ -64,7 +64,7 @@ import FutaBus.bean.LoginRequest;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 
-@CrossOrigin(origins = "*")
+@CrossOrigin(origins = "http://localhost:8086", allowCredentials = "true")
 @RestController
 @RequestMapping("/api/user")
 public class UserApiController {
@@ -259,7 +259,19 @@ public class UserApiController {
 
 	@PostMapping("/confirmBooking")
 	@ResponseBody
-	public ResponseEntity<Map<String, Object>> confirmBooking(@RequestBody BookingWrapper wrapper) {
+	public ResponseEntity<Map<String, Object>> confirmBooking(@RequestBody BookingWrapper wrapper, HttpSession session) {
+		
+		NguoiDung nguoiDung = (NguoiDung) session.getAttribute("currentUser");
+		
+		System.out.println("Session ID: " + session.getId());
+		System.out.println("NguoiDung từ session: " + nguoiDung);
+		
+		if (nguoiDung == null) {
+	        Map<String, Object> response = new HashMap<>();
+	        response.put("status", "error");
+	        response.put("message", "Bạn cần phải đăng nhập trước khi đặt vé!");
+	        return ResponseEntity.status(401).body(response);
+	    }
 
 		BookingRequest go = wrapper.getBookingData();
 		BookingRequest back = wrapper.getBookingDataReturn();
@@ -274,7 +286,7 @@ public class UserApiController {
 				.collect(Collectors.toList());
 
 		PhieuDatVeDao phieuDatVeDao = new PhieuDatVeDao();
-		phieuDatVeDao.saveBooking(go);
+		phieuDatVeDao.saveBooking(go, nguoiDung.getIdNguoiDung());
 
 		if (back != null && back.getIdViTriGhe() != null && !back.getIdViTriGhe().isEmpty()) {
 			String idViTriGheReturnStr = back.getIdViTriGhe();
@@ -282,7 +294,7 @@ public class UserApiController {
 					.collect(Collectors.toList());
 
 			PhieuDatVeDao phieuDatVeReturnDao = new PhieuDatVeDao();
-			phieuDatVeReturnDao.saveBooking(back);
+			phieuDatVeDao.saveBooking(back, nguoiDung.getIdNguoiDung());
 		}
 
 		Map<String, Object> response = new HashMap<>();
@@ -291,11 +303,12 @@ public class UserApiController {
 
 		return ResponseEntity.ok(response);
 	}
+	
 	@PostMapping("/login")
 	@ResponseBody
 	public ResponseEntity<Map<String, Object>> login(@RequestBody LoginRequest loginRequest, HttpSession session) {
 	    System.out.println("Nhận yêu cầu đăng nhập từ client:");
-	    System.out.println("soDienThoai: " + loginRequest.getSoDienThoai());
+	    System.out.println("email: " + loginRequest.getEmail());
 	    System.out.println("matKhau: " + loginRequest.getMatKhau());
 
 	    NguoiDungDao nguoiDungDao = new NguoiDungDao();
@@ -304,7 +317,7 @@ public class UserApiController {
 
 	    try {
 	        System.out.println("Bắt đầu kiểm tra đăng nhập...");
-	        nguoiDung = nguoiDungDao.checkLogin(loginRequest.getSoDienThoai(), loginRequest.getMatKhau());
+	        nguoiDung = nguoiDungDao.checkLogin(loginRequest.getEmail(), loginRequest.getMatKhau());
 	        System.out.println("Kiểm tra đăng nhập hoàn tất!");
 	    } catch (Exception e) {
 	        System.out.println("Lỗi khi kiểm tra đăng nhập: " + e.getMessage());
