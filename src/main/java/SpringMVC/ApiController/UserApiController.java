@@ -71,13 +71,13 @@ public class UserApiController {
 
 	@Autowired
     private JavaMailSender mailSender;
-
+	
 	@GetMapping("/tinhthanh")
 	public Map<String, Object> getTinhThanh() {
 
 		TinhThanhDao tinhThanhDao = new TinhThanhDao();
 		List<TinhThanh> tinhThanhList = tinhThanhDao.getAllTinhThanh();
-
+		
 		return Map.of("tinhThanhList", tinhThanhList);
 	}
 
