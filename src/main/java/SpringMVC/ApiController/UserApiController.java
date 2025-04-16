@@ -24,6 +24,7 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -335,9 +336,14 @@ public class UserApiController {
 
 	        response.put("status", "success");
 	        response.put("message", "Đăng nhập thành công!");
+	        if (nguoiDung.getHoTen() == null || nguoiDung.getHoTen().isEmpty()) {
+	            nguoiDung.setHoTen("bạn");
+	        }
+
 	        response.put("nguoiDung", Map.of(
 	            "idNguoiDung", nguoiDung.getIdNguoiDung(),
-	            "idPhanQuyen", nguoiDung.getIdPhanQuyen()
+	            "idPhanQuyen", nguoiDung.getIdPhanQuyen(),
+	            "hoTen", nguoiDung.getHoTen()
 	        ));
 	    } else {
 	        System.out.println("Đăng nhập thất bại - sai thông tin!");
@@ -347,8 +353,6 @@ public class UserApiController {
 
 	    return ResponseEntity.ok(response);
 	}
-
-	 
 	
 	@PostMapping("/send-otp")
     @ResponseBody
@@ -420,6 +424,7 @@ public class UserApiController {
 	    nguoiDung.setMatKhau("123");
 	    nguoiDung.setTrangThai(1);
 	    nguoiDung.setIdPhanQuyen(1);
+	    nguoiDung.setNgayDangKy(new Date());
 
 	    try {
 	        nguoiDungDao.save(nguoiDung);
@@ -460,5 +465,20 @@ public class UserApiController {
         message.setText(body);
         mailSender.send(message);
     }
+    
+    @GetMapping("/general-information/{id}")
+	public ResponseEntity<NguoiDung> getGeneralInformation(@PathVariable("id") Integer id) {
+    	
+    	NguoiDungDao nguoiDungDao = new NguoiDungDao();
+
+    	NguoiDung nguoiDung = nguoiDungDao.getNguoiDungById(id);
+    	
+    	System.out.println("nguoiDung được in ra: " + nguoiDung);
+        if (nguoiDung != null) {
+            return ResponseEntity.ok(nguoiDung);
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+	}
 
 }

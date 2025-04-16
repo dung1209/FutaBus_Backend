@@ -169,4 +169,34 @@ public class NguoiDungDao {
         }
     }
     
+    public NguoiDung getNguoiDungById(int idNguoiDung) {
+        NguoiDung nguoiDung = null;
+        Session session = null;
+        Transaction transaction = null;
+
+        try {
+            if (factory == null) {
+                factory = HibernateUtils.getSessionFactory();
+            }
+
+            session = factory.openSession();
+            transaction = session.beginTransaction();
+
+            String hql = "from NguoiDung where idNguoiDung = :idNguoiDung";
+            Query<NguoiDung> query = session.createQuery(hql, NguoiDung.class);
+            query.setParameter("idNguoiDung", idNguoiDung);
+
+            nguoiDung = query.uniqueResult();
+
+            transaction.commit();
+        } catch (Exception e) {
+            if (transaction != null) transaction.rollback();
+            e.printStackTrace();
+        } finally {
+            if (session != null) session.close();
+        }
+
+        return nguoiDung;
+    }
+    
 }
