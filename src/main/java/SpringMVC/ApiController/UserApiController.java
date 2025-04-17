@@ -18,6 +18,7 @@ import java.time.format.DateTimeFormatter;
 import javax.servlet.http.HttpSession;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -51,6 +52,7 @@ import FutaBus.bean.BookingRequest;
 import FutaBus.bean.BookingWrapper;
 import FutaBus.bean.ChuyenXe;
 import FutaBus.bean.ChuyenXeResult;
+import FutaBus.bean.CreateAccountRequest;
 import FutaBus.bean.NguoiDung;
 import FutaBus.bean.OtpRequest;
 import FutaBus.bean.QuanHuyen;
@@ -418,27 +420,55 @@ public class UserApiController {
 	        return ResponseEntity.badRequest().body(response);
 	    }
 
-	    NguoiDungDao nguoiDungDao = new NguoiDungDao();
-	    NguoiDung nguoiDung = new NguoiDung();
-	    nguoiDung.setEmail(email);
-	    nguoiDung.setMatKhau("123");
-	    nguoiDung.setTrangThai(1);
-	    nguoiDung.setIdPhanQuyen(1);
-	    nguoiDung.setNgayDangKy(new Date());
-
-	    try {
-	        nguoiDungDao.save(nguoiDung);
-	        session.removeAttribute("otp");
-	        session.removeAttribute("email");
-	        response.put("success", true);
-	        response.put("message", "Đăng ký thành công!");
-	    } catch (Exception e) {
-	        response.put("success", false);
-	        response.put("message", "Lỗi khi đăng ký: " + e.getMessage());
-	        return ResponseEntity.status(500).body(response);
-	    }
+	    response.put("success", true);
+	    response.put("message", "OTP hợp lệ! Bạn có thể nhập mật khẩu.");
 
 	    return ResponseEntity.ok(response);
+	}
+	
+	@PostMapping("/create-account")
+	@ResponseBody
+	public ResponseEntity<Map<String, Object>> createAccount(@RequestBody CreateAccountRequest request, HttpSession session) {
+	    String email = request.getEmail();
+	    String password = request.getPassword();
+
+	    Map<String, Object> response = new HashMap<>();
+
+	    String sessionEmail = (String) session.getAttribute("email");
+	    if (sessionEmail == null || !sessionEmail.equals(email)) {
+	        response.put("success", false);
+	        response.put("message", "Email chưa được xác thực hoặc không khớp!");
+	        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
+	    }
+
+	    if (email == null || password == null || email.trim().isEmpty() || password.trim().isEmpty()) {
+	        response.put("success", false);
+	        response.put("message", "Thông tin không được để trống!");
+	        return ResponseEntity.badRequest().body(response);
+	    }
+
+	    try {
+	        NguoiDungDao nguoiDungDao = new NguoiDungDao();
+	        NguoiDung nguoiDung = new NguoiDung();
+	        nguoiDung.setEmail(email);
+	        nguoiDung.setMatKhau(password); 
+	        nguoiDung.setTrangThai(1);
+	        nguoiDung.setIdPhanQuyen(1);
+	        nguoiDung.setNgayDangKy(new Date());
+
+	        nguoiDungDao.save(nguoiDung);
+
+	        session.removeAttribute("otp");
+	        session.removeAttribute("email");
+
+	        response.put("success", true);
+	        response.put("message", "Tạo tài khoản thành công!");
+	        return ResponseEntity.ok(response);
+	    } catch (Exception e) {
+	        response.put("success", false);
+	        response.put("message", "Đã có lỗi khi tạo tài khoản: " + e.getMessage());
+	        return ResponseEntity.status(500).body(response);
+	    }
 	}
 
     private String generateOTP() {
