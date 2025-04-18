@@ -199,4 +199,44 @@ public class NguoiDungDao {
         return nguoiDung;
     }
     
+    public boolean updateNguoiDung(NguoiDung nguoiDung) {
+        Session session = null;
+        Transaction transaction = null;
+        boolean isUpdated = false;
+
+        try {
+            if (factory == null) {
+                factory = HibernateUtils.getSessionFactory();
+            }
+            session = factory.openSession();
+            transaction = session.beginTransaction();
+
+            NguoiDung existingUser = session.get(NguoiDung.class, nguoiDung.getIdNguoiDung());
+
+            if (existingUser != null) {
+                existingUser.setHoTen(nguoiDung.getHoTen());
+                existingUser.setGioiTinh(nguoiDung.getGioiTinh());
+                existingUser.setNamSinh(nguoiDung.getNamSinh());
+                existingUser.setSoDienThoai(nguoiDung.getSoDienThoai());
+                existingUser.setDiaChi(nguoiDung.getDiaChi());
+
+                session.update(existingUser);
+                transaction.commit();
+                isUpdated = true; 
+            } else {
+                isUpdated = false;
+            }
+        } catch (Exception e) {
+            if (transaction != null) {
+                transaction.rollback();
+            }
+            e.printStackTrace();
+        } finally {
+            if (session != null) {
+                session.close();
+            }
+        }
+        return isUpdated;
+    }
+    
 }

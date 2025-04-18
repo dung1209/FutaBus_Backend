@@ -81,15 +81,19 @@ public class NguoiDung {
         this.hoTen = hoTen;
     }
 
-    public boolean isGioiTinh() {
-        return gioiTinh;
-    }
-
     public void setGioiTinh(boolean gioiTinh) {
-        this.gioiTinh = gioiTinh;
-    }
+		this.gioiTinh = gioiTinh;
+	}
+    
+    public boolean getGioiTinh() {
+    	return gioiTinh;
+	}
 
-    public int getNamSinh() {
+	public int getTrangThai() {
+		return trangThai;
+	}
+
+	public int getNamSinh() {
         return namSinh;
     }
 
