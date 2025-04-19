@@ -57,6 +57,8 @@ import FutaBus.bean.ChuyenXeResult;
 import FutaBus.bean.CreateAccountRequest;
 import FutaBus.bean.NguoiDung;
 import FutaBus.bean.OtpRequest;
+import FutaBus.bean.PhieuDatVe;
+import FutaBus.bean.PurchaseHistory;
 import FutaBus.bean.QuanHuyen;
 import FutaBus.bean.TinhThanh;
 import FutaBus.bean.TuyenXe;
@@ -347,7 +349,8 @@ public class UserApiController {
 	        response.put("nguoiDung", Map.of(
 	            "idNguoiDung", nguoiDung.getIdNguoiDung(),
 	            "idPhanQuyen", nguoiDung.getIdPhanQuyen(),
-	            "hoTen", nguoiDung.getHoTen()
+	            "hoTen", nguoiDung.getHoTen(),
+	            "matKhau", nguoiDung.getMatKhau()
 	        ));
 	    } else {
 	        System.out.println("Đăng nhập thất bại - sai thông tin!");
@@ -551,6 +554,76 @@ public class UserApiController {
           return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
       }
     }
+    
+    @PostMapping("/update-password")
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> updatePassword(@RequestBody NguoiDung nguoiDung) {
+      Map<String, Object> response = new HashMap<>();
 
+      if (nguoiDung == null || nguoiDung.getIdNguoiDung() == 0) {
+          response.put("success", false);
+          response.put("message", "Thông tin người dùng không hợp lệ!");
+          return ResponseEntity.badRequest().body(response);
+      }
+
+      try {
+          NguoiDungDao nguoiDungDao = new NguoiDungDao();
+
+          NguoiDung existingUser = nguoiDungDao.getNguoiDungById(nguoiDung.getIdNguoiDung());
+          if (existingUser == null) {
+              response.put("success", false);
+              response.put("message", "Người dùng không tồn tại!");
+              return ResponseEntity.badRequest().body(response);
+          }
+
+          existingUser.setMatKhau(nguoiDung.getMatKhau());
+
+          nguoiDungDao.updateMatKhau(existingUser);
+
+          response.put("success", true);
+          response.put("message", "Cập nhật mật khẩu người dùng thành công!");
+          return ResponseEntity.ok(response);
+      } catch (Exception e) {
+          response.put("success", false);
+          response.put("message", "Lỗi khi cập nhật: " + e.getMessage());
+          return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+      }
+    }
+    
+    @GetMapping("/purchase-history/{idNguoiDung}")
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> getLichSuMuaVe(@PathVariable int idNguoiDung) {
+        Map<String, Object> response = new HashMap<>();
+
+        try {
+            PhieuDatVeDao dao = new PhieuDatVeDao();
+            List<PurchaseHistory> dsVe = dao.getLichSuMuaVeByIdNguoiDung(idNguoiDung);
+
+            List<Map<String, Object>> result = new ArrayList<>();
+            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            
+            for (PurchaseHistory record : dsVe) {
+                Map<String, Object> data = new HashMap<>();
+                String formattedThoiDiemDi = dateFormat.format(record.getThoiDiemDi());
+                
+                data.put("idPhieuDatVe", record.getIdPhieuDatVe());
+                data.put("tenTuyen", record.getTenTuyen());
+                data.put("thoiDiemDi", formattedThoiDiemDi);
+                data.put("soLuongVe", record.getSoLuongVe());
+                data.put("tongTien", record.getTongTien());
+                data.put("trangThai", record.getTrangThai());
+                result.add(data);
+            }
+
+            response.put("success", true);
+            response.put("data", result);
+            return ResponseEntity.ok(response);
+
+        } catch (Exception e) {
+            response.put("success", false);
+            response.put("message", "Lỗi khi lấy dữ liệu: " + e.getMessage());
+            return ResponseEntity.internalServerError().body(response);
+        }
+    }
 
 }

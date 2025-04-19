@@ -239,4 +239,40 @@ public class NguoiDungDao {
         return isUpdated;
     }
     
+    public boolean updateMatKhau(NguoiDung nguoiDung) {
+        Session session = null;
+        Transaction transaction = null;
+        boolean isUpdated = false;
+
+        try {
+            if (factory == null) {
+                factory = HibernateUtils.getSessionFactory();
+            }
+            session = factory.openSession();
+            transaction = session.beginTransaction();
+
+            NguoiDung existingUser = session.get(NguoiDung.class, nguoiDung.getIdNguoiDung());
+
+            if (existingUser != null) {
+                existingUser.setMatKhau(nguoiDung.getMatKhau());
+
+                session.update(existingUser);
+                transaction.commit();
+                isUpdated = true; 
+            } else {
+                isUpdated = false;
+            }
+        } catch (Exception e) {
+            if (transaction != null) {
+                transaction.rollback();
+            }
+            e.printStackTrace();
+        } finally {
+            if (session != null) {
+                session.close();
+            }
+        }
+        return isUpdated;
+    }
+    
 }
