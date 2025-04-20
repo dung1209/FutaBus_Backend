@@ -93,7 +93,7 @@ public class ChuyenXeDao {
                     "    t.thoiGianDiChuyenTB, " +
                     "    bendi.tenBenXe AS tenBenXeDi, " +
                     "    benden.tenBenXe AS tenBenXeDen, " +
-                    "    t.giaHienHanh, " +
+                    "    c.giaVe, " +
                     "    c.idChuyenXe, " +
                     "    c.thoiDiemDi, " +
                     "    c.thoiDiemDen, " +
@@ -114,7 +114,7 @@ public class ChuyenXeDao {
                     "    CONVERT(DATE, c.thoiDiemDi) = CONVERT(DATE, :departureDate) " + 
                     "GROUP BY " +
                     "    t.thoiGianDiChuyenTB, bendi.tenBenXe, benden.tenBenXe, " +
-                    "    t.giaHienHanh, c.idChuyenXe, c.thoiDiemDi, c.thoiDiemDen, lx.tenLoai, x.idXe " +
+                    "    c.giaVe, c.idChuyenXe, c.thoiDiemDi, c.thoiDiemDen, lx.tenLoai, x.idXe " +
                     "HAVING " +
                     "    COUNT(vt.idViTriGhe) >= :tickets";
 
