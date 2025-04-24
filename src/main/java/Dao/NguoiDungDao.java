@@ -27,7 +27,7 @@ public class NguoiDungDao {
             session = factory.openSession();
             transaction = session.beginTransaction();
 
-            String hql = "from NguoiDung where idPhanQuyen = :idPhanQuyen";
+            String hql = "from NguoiDung where idPhanQuyen = :idPhanQuyen and trangThai != 0";
             Query<NguoiDung> query = session.createQuery(hql, NguoiDung.class);
             query.setParameter("idPhanQuyen", idPhanQuyen);
             query.setFirstResult(offset);
@@ -60,7 +60,7 @@ public class NguoiDungDao {
             session = factory.openSession();
             transaction = session.beginTransaction();
 
-            String hql = "select count(*) from NguoiDung where idPhanQuyen = :idPhanQuyen";
+            String hql = "select count(*) from NguoiDung where idPhanQuyen = :idPhanQuyen and trangThai != 0";
             Query<Long> query = session.createQuery(hql, Long.class);
             query.setParameter("idPhanQuyen", idPhanQuyen);
             total = query.uniqueResult();
@@ -78,6 +78,7 @@ public class NguoiDungDao {
         }
         return total;
     }
+    
     public NguoiDung checkLogin(String email, String matKhau) {
         NguoiDung nguoiDung = null;
         Session session = null;
@@ -273,6 +274,41 @@ public class NguoiDungDao {
             }
         }
         return isUpdated;
+    }
+    
+    public boolean xoaNguoiDung(int id) {
+        Session session = null;
+        Transaction transaction = null;
+
+        try {
+            if (factory == null) {
+                factory = HibernateUtils.getSessionFactory();
+            }
+
+            session = factory.openSession();
+            transaction = session.beginTransaction();
+
+            NguoiDung nguoiDung = session.get(NguoiDung.class, id);
+            if (nguoiDung != null) {
+                nguoiDung.setTrangThai(0);
+                session.update(nguoiDung);
+                transaction.commit();
+                return true;
+            } else {
+                return false;
+            }
+
+        } catch (Exception e) {
+            if (transaction != null) {
+                transaction.rollback();
+            }
+            e.printStackTrace();
+            return false;
+        } finally {
+            if (session != null) {
+                session.close();
+            }
+        }
     }
     
 }

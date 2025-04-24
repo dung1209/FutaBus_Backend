@@ -126,5 +126,27 @@ public class PhieuDatVeDao {
 
 		return purchaseHistoryList;
 	}
+	
+	public BigDecimal getTongDoanhThuThangHienTai() {
+	    Session session = HibernateUtils.getSessionFactory().openSession();
+	    BigDecimal tongDoanhThu = BigDecimal.ZERO;
+
+	    try {
+	        String hql = "SELECT COALESCE(SUM(p.tongTien), 0) " +
+	                     "FROM PhieuDatVe p " +
+	                     "WHERE MONTH(p.thoiGianDatVe) = MONTH(CURRENT_DATE()) " +
+	                     "AND YEAR(p.thoiGianDatVe) = YEAR(CURRENT_DATE()) " +
+	                     "AND p.trangThai = 4";
+
+	        tongDoanhThu = (BigDecimal) session.createQuery(hql).uniqueResult();
+
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	    } finally {
+	        session.close();
+	    }
+
+	    return tongDoanhThu;
+	}
 
 }

@@ -1,10 +1,15 @@
 package SpringMVC.ApiController;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -13,6 +18,7 @@ import Dao.BenXeDao;
 import Dao.ChuyenXeDao;
 import Dao.LoaiXeDao;
 import Dao.NguoiDungDao;
+import Dao.PhieuDatVeDao;
 import Dao.QuanHuyenDao;
 import Dao.TinhThanhDao;
 import Dao.TuyenXeDao;
@@ -26,6 +32,7 @@ import FutaBus.bean.TuyenXe;
 import FutaBus.bean.Xe;
 import FutaBus.bean.LoaiXe;
 
+@CrossOrigin(origins = "http://localhost:8086", allowCredentials = "true")
 @RestController
 @RequestMapping("/api/admin")
 public class AdminApiController {
@@ -38,17 +45,28 @@ public class AdminApiController {
             @RequestParam(value = "loaiNguoiDung", defaultValue = "1") int loaiNguoiDung) {
 
         NguoiDungDao nguoiDungDao = new NguoiDungDao();
+        XeDao xeDao = new XeDao();
+        ChuyenXeDao chuyenXeDao = new ChuyenXeDao();
+        PhieuDatVeDao phieuDatVeDao = new PhieuDatVeDao();
 
         int offset = (page - 1) * PAGE_SIZE;
         List<NguoiDung> nguoiDungList = nguoiDungDao.getNguoiDungByPage(offset, PAGE_SIZE, loaiNguoiDung);
 
         long totalNguoiDung = nguoiDungDao.getTotalNguoiDung(loaiNguoiDung);
         int totalPages = (int) Math.ceil((double) totalNguoiDung / PAGE_SIZE);
+        long totalCustomer = nguoiDungDao.getTotalNguoiDung(1);
+        long totalXe = xeDao.getTotalXe();
+        long totalChuyenXe = chuyenXeDao.getTotalChuyenXe();
+        BigDecimal tongDoanhThuThangHienTai = phieuDatVeDao.getTongDoanhThuThangHienTai();
 
         return Map.of(
             "nguoiDungList", nguoiDungList,
             "currentPage", page,
-            "totalPages", totalPages
+            "totalPages", totalPages,
+            "totalCustomer", totalCustomer,
+            "totalXe", totalXe,
+            "totalChuyenXe", totalChuyenXe,
+            "tongDoanhThuThangHienTai", tongDoanhThuThangHienTai
         );
     }
     
@@ -154,5 +172,16 @@ public class AdminApiController {
         );
     }
 
-    
+    @PutMapping("/nguoidung/xoa/{id}")
+    public ResponseEntity<String> xoaNguoiDung(@PathVariable("id") int id) {
+        NguoiDungDao nguoiDungDao = new NguoiDungDao();
+        boolean thanhCong = nguoiDungDao.xoaNguoiDung(id);
+
+        if (thanhCong) {
+            return ResponseEntity.ok("Xoá người dùng (mềm) thành công");
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Không tìm thấy người dùng hoặc lỗi trong quá trình xoá");
+        }
+    }
+
 }
