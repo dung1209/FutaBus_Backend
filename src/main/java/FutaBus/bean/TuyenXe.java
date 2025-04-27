@@ -32,9 +32,6 @@ public class TuyenXe {
     @Column(name = "thoiGianDiChuyenTB", nullable = false)
     private float thoiGianDiChuyenTB;
 
-    @Column(name = "giaHienHanh", nullable = true)
-    private double giaHienHanh;
-
     @Column(name = "quangDuong", nullable = false)
     private float quangDuong;
     
@@ -50,13 +47,12 @@ public class TuyenXe {
     }
 
     public TuyenXe(int idTuyenXe, String tenTuyen, int soNgayChayTrongTuan, int soChuyenTrongNgay, float thoiGianDiChuyenTB, 
-                   double giaHienHanh, float quangDuong, BenXe benXeDi, BenXe benXeDen) {
+                   float quangDuong, BenXe benXeDi, BenXe benXeDen) {
         this.idTuyenXe = idTuyenXe;
         this.tenTuyen = tenTuyen;
         this.soNgayChayTrongTuan = soNgayChayTrongTuan;
         this.soChuyenTrongNgay = soChuyenTrongNgay;
         this.thoiGianDiChuyenTB = thoiGianDiChuyenTB;
-        this.giaHienHanh = giaHienHanh;
         this.quangDuong = quangDuong;
         this.benXeDi = benXeDi;  
         this.benXeDen = benXeDen; 
@@ -102,14 +98,6 @@ public class TuyenXe {
         this.thoiGianDiChuyenTB = thoiGianDiChuyenTB;
     }
 
-    public double getGiaHienHanh() {
-        return giaHienHanh;
-    }
-
-    public void setGiaHienHanh(double giaHienHanh) {
-        this.giaHienHanh = giaHienHanh;
-    }
-
     public float getQuangDuong() {
         return quangDuong;
     }
@@ -150,19 +138,28 @@ public class TuyenXe {
         this.tinhThanhDen = tinhThanhDen;
     }
 
+	/*@Override
+	public String toString() {
+		return "TuyenXe [idTuyenXe=" + idTuyenXe + ", tenTuyen=" + tenTuyen + ", tinhThanhDi=" + tinhThanhDi
+				+ ", tinhThanhDen=" + tinhThanhDen + ", soNgayChayTrongTuan=" + soNgayChayTrongTuan
+				+ ", soChuyenTrongNgay=" + soChuyenTrongNgay + ", thoiGianDiChuyenTB=" + thoiGianDiChuyenTB
+				+ ", quangDuong=" + quangDuong + ", benXeDi=" + benXeDi + ", benXeDen=" + benXeDen + "]";
+	}*/
     @Override
     public String toString() {
-        return "TuyenXe{" +
-                "idTuyenXe=" + idTuyenXe +
-                ", tenTuyen='" + tenTuyen + '\'' +
-                ", soNgayChayTrongTuan=" + soNgayChayTrongTuan +
-                ", soChuyenTrongNgay=" + soChuyenTrongNgay +
-                ", thoiGianDiChuyenTB=" + thoiGianDiChuyenTB +
-                ", giaHienHanh=" + giaHienHanh +
-                ", quangDuong=" + quangDuong +
-                ", benXeDi=" + benXeDi +  
-                ", benXeDen=" + benXeDen + 
-                '}';
+        return "TuyenXe [idTuyenXe=" + idTuyenXe 
+                + ", tenTuyen=" + tenTuyen 
+                + ", idTinhThanhDi=" + (tinhThanhDi != null ? tinhThanhDi.getIdTinhThanh() : "null")
+                + ", idTinhThanhDen=" + (tinhThanhDen != null ? tinhThanhDen.getIdTinhThanh() : "null")
+                + ", soNgayChayTrongTuan=" + soNgayChayTrongTuan
+                + ", soChuyenTrongNgay=" + soChuyenTrongNgay 
+                + ", thoiGianDiChuyenTB=" + thoiGianDiChuyenTB
+                + ", quangDuong=" + quangDuong 
+                + ", idBenXeDi=" + (benXeDi != null ? benXeDi.getIdBenXe() : "null")
+                + ", idBenXeDen=" + (benXeDen != null ? benXeDen.getIdBenXe() : "null")
+                + "]";
     }
+
+    
 }
 

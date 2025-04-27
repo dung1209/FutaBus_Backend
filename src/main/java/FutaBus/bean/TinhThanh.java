@@ -37,6 +37,10 @@ public class TinhThanh {
     public void setTenTinh(String tenTinh) {
         this.tenTinh = tenTinh;
     }
+    
+    public void setIdTinhThanh(int idTinhThanh) {
+        this.idTinhThanh = idTinhThanh;
+    }
 
     @Override
     public String toString() {

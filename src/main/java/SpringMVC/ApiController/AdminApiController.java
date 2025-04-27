@@ -1,6 +1,7 @@
 package SpringMVC.ApiController;
 
 import java.math.BigDecimal;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -9,9 +10,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import Dao.BenXeDao;
@@ -29,6 +33,7 @@ import FutaBus.bean.NguoiDung;
 import FutaBus.bean.QuanHuyen;
 import FutaBus.bean.TinhThanh;
 import FutaBus.bean.TuyenXe;
+import FutaBus.bean.TuyenXeUpdateDTO;
 import FutaBus.bean.Xe;
 import FutaBus.bean.LoaiXe;
 
@@ -76,19 +81,35 @@ public class AdminApiController {
 
         TuyenXeDao tuyenXeDao = new TuyenXeDao();
         BenXeDao benXeDao = new BenXeDao();
+        QuanHuyenDao quanHuyenDao = new QuanHuyenDao();
+        XeDao xeDao = new XeDao();
+        ChuyenXeDao chuyenXeDao = new ChuyenXeDao();
+        PhieuDatVeDao phieuDatVeDao = new PhieuDatVeDao();
+        NguoiDungDao nguoiDungDao = new NguoiDungDao();
 
         int offset = (page - 1) * 4;
         List<TuyenXe> tuyenXeList = tuyenXeDao.getTuyenXeByPage(offset, 4);
         List<BenXe> benXeList = benXeDao.getAllBenXe();
+        List<QuanHuyen> quanHuyenList = quanHuyenDao.getAllQuanHuyen();
         
         long totalTuyenXe = tuyenXeDao.getTotalTuyenXe();
         int totalPages = (int) Math.ceil((double) totalTuyenXe / 4);
+        
+        long totalCustomer = nguoiDungDao.getTotalNguoiDung(1);
+        long totalXe = xeDao.getTotalXe();
+        long totalChuyenXe = chuyenXeDao.getTotalChuyenXe();
+        BigDecimal tongDoanhThuThangHienTai = phieuDatVeDao.getTongDoanhThuThangHienTai();
 
         return Map.of(
             "tuyenXeList", tuyenXeList,
             "benXeList", benXeList,
+            "quanHuyenList", quanHuyenList,
             "currentPage", page,
-            "totalPages", totalPages
+            "totalPages", totalPages,
+            "totalCustomer", totalCustomer,
+            "totalXe", totalXe,
+            "totalChuyenXe", totalChuyenXe,
+            "tongDoanhThuThangHienTai", tongDoanhThuThangHienTai
         );
     }
     
@@ -181,6 +202,63 @@ public class AdminApiController {
             return ResponseEntity.ok("Xoá người dùng (mềm) thành công");
         } else {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Không tìm thấy người dùng hoặc lỗi trong quá trình xoá");
+        }
+    }
+    
+    @PostMapping("/update-tuyenxe")
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> updateTuyenXe(@RequestBody TuyenXeUpdateDTO tuyenXe) {
+        Map<String, Object> response = new HashMap<>();
+        
+        System.out.println("Giá trị tuyến xe in ra###: " + tuyenXe);
+
+        if (tuyenXe == null || tuyenXe.getIdTuyenXe() == 0) {
+            response.put("success", false);
+            response.put("message", "Thông tin tuyến xe không hợp lệ!");
+            return ResponseEntity.badRequest().body(response);
+        }
+
+        try {
+            TuyenXeDao tuyenXeDao = new TuyenXeDao();
+            TuyenXe existingTuyen = tuyenXeDao.getTuyenXeById(tuyenXe.getIdTuyenXe());
+
+            if (existingTuyen == null) {
+                response.put("success", false);
+                response.put("message", "Tuyến xe không tồn tại!");
+                return ResponseEntity.badRequest().body(response);
+            }
+
+            existingTuyen.setTenTuyen(tuyenXe.getTenTuyen());
+            existingTuyen.setQuangDuong(tuyenXe.getQuangDuong());
+            existingTuyen.setThoiGianDiChuyenTB(tuyenXe.getThoiGianDiChuyenTB());
+            existingTuyen.setSoChuyenTrongNgay(tuyenXe.getSoChuyenTrongNgay());
+            existingTuyen.setSoNgayChayTrongTuan(tuyenXe.getSoNgayChayTrongTuan());
+
+            BenXe benXeDi = new BenXe();
+            benXeDi.setIdBenXe(tuyenXe.getIdBenXeDi());
+            existingTuyen.setBenXeDi(benXeDi);
+
+            BenXe benXeDen = new BenXe();
+            benXeDen.setIdBenXe(tuyenXe.getIdBenXeDen());
+            existingTuyen.setBenXeDen(benXeDen);
+
+            TinhThanh tinhThanhDi = new TinhThanh();
+            tinhThanhDi.setIdTinhThanh(tuyenXe.getIdTinhThanhDi());
+            existingTuyen.setTinhThanhDi(tinhThanhDi);
+
+            TinhThanh tinhThanhDen = new TinhThanh();
+            tinhThanhDen.setIdTinhThanh(tuyenXe.getIdTinhThanhDen());
+            existingTuyen.setTinhThanhDen(tinhThanhDen);
+
+            tuyenXeDao.updateTuyenXe(existingTuyen);
+
+            response.put("success", true);
+            response.put("message", "Cập nhật tuyến xe thành công!");
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            response.put("success", false);
+            response.put("message", "Lỗi khi cập nhật: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
     }
 
