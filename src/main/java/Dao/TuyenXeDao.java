@@ -27,7 +27,7 @@ public class TuyenXeDao {
             session = factory.openSession();
             transaction = session.beginTransaction();
 
-            String hql = "from TuyenXe";
+            String hql = "from TuyenXe where trangThai != 0";
             Query<TuyenXe> query = session.createQuery(hql, TuyenXe.class);
             query.setFirstResult(offset);
             query.setMaxResults(limit);
@@ -57,7 +57,7 @@ public class TuyenXeDao {
             }
             session = factory.openSession();
 
-            String hql = "select count(*) from TuyenXe";
+            String hql = "select count(*) from TuyenXe where trangThai != 0";
             Query<Long> query = session.createQuery(hql, Long.class);
             total = query.uniqueResult();
 
@@ -143,4 +143,40 @@ public class TuyenXeDao {
 
         return isUpdated;
     }
+    
+    public boolean xoaTuyenXe(int id) {
+        Session session = null;
+        Transaction transaction = null;
+
+        try {
+            if (factory == null) {
+                factory = HibernateUtils.getSessionFactory();
+            }
+
+            session = factory.openSession();
+            transaction = session.beginTransaction();
+
+            TuyenXe tuyenXe = session.get(TuyenXe.class, id);
+            if (tuyenXe != null) {
+                tuyenXe.setTrangThai(0);
+                session.update(tuyenXe);
+                transaction.commit();
+                return true;
+            } else {
+                return false;
+            }
+
+        } catch (Exception e) {
+            if (transaction != null) {
+                transaction.rollback();
+            }
+            e.printStackTrace();
+            return false;
+        } finally {
+            if (session != null) {
+                session.close();
+            }
+        }
+    }
+
 }

@@ -261,5 +261,17 @@ public class AdminApiController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
     }
+    
+    @PutMapping("/tuyenxe/xoa/{id}")
+    public ResponseEntity<String> xoaTuyenXe(@PathVariable("id") int id) {
+        TuyenXeDao tuyenXeDao = new TuyenXeDao();
+        boolean thanhCong = tuyenXeDao.xoaTuyenXe(id);
+
+        if (thanhCong) {
+            return ResponseEntity.ok("Xoá người dùng (mềm) thành công");
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Không tìm thấy tuyến xe hoặc lỗi trong quá trình xoá");
+        }
+    }
 
 }

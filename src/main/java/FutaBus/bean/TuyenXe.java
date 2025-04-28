@@ -42,6 +42,9 @@ public class TuyenXe {
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "idBenXeDen", nullable = false)
     private BenXe benXeDen; 
+    
+    @Column(name = "trangThai", nullable = false)
+    private int trangThai;
 
     public TuyenXe() {
     }
@@ -66,7 +69,15 @@ public class TuyenXe {
         this.idTuyenXe = idTuyenXe;
     }
 
-    public String getTenTuyen() {
+    public int getTrangThai() {
+		return trangThai;
+	}
+
+	public void setTrangThai(int trangThai) {
+		this.trangThai = trangThai;
+	}
+
+	public String getTenTuyen() {
         return tenTuyen;
     }
 
