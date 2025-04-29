@@ -28,6 +28,7 @@ import Dao.TinhThanhDao;
 import Dao.TuyenXeDao;
 import Dao.XeDao;
 import FutaBus.bean.BenXe;
+import FutaBus.bean.BookingInfo;
 import FutaBus.bean.ChuyenXe;
 import FutaBus.bean.NguoiDung;
 import FutaBus.bean.QuanHuyen;
@@ -190,6 +191,25 @@ public class AdminApiController {
             "totalQuanPages", totalQuanPages,
             "currentTinhPage", pageTinh,
             "totalTinhPages", totalTinhPages
+        );
+    }
+
+    @GetMapping("/ticket")
+    public Map<String, Object> getAllBookingInfo(
+            @RequestParam(value = "page", defaultValue = "1") int page) {
+        PhieuDatVeDao phieuDatVeDao = new PhieuDatVeDao();
+
+        int offset = (page - 1) * PAGE_SIZE;
+
+        List<BookingInfo> bookingInfoList = phieuDatVeDao.getBookingInfoByPage(offset, PAGE_SIZE);
+
+        long total = phieuDatVeDao.getTotalBookingInfo();
+        int totalPages = (int) Math.ceil((double) total / PAGE_SIZE);
+
+        return Map.of(
+            "bookingInfoList", bookingInfoList,
+            "currentPage", page,
+            "totalPages", totalPages
         );
     }
 
