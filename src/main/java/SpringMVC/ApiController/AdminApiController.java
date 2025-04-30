@@ -122,6 +122,7 @@ public class AdminApiController {
         TuyenXeDao tuyenXeDao = new TuyenXeDao();
         XeDao xeDao = new XeDao();
         NguoiDungDao nguoiDungDao = new NguoiDungDao();
+        PhieuDatVeDao phieuDatVeDao = new PhieuDatVeDao();
 
         int offset = (page - 1) * 4;
         List<ChuyenXe> chuyenXeList = chuyenXeDao.getChuyenXeByPage(offset, 4);
@@ -131,6 +132,10 @@ public class AdminApiController {
         
         long totalChuyenXe = chuyenXeDao.getTotalChuyenXe();
         int totalPages = (int) Math.ceil((double) totalChuyenXe / 4);
+        
+        long totalCustomer = nguoiDungDao.getTotalNguoiDung(1);
+        long totalXe = xeDao.getTotalXe();
+        BigDecimal tongDoanhThuThangHienTai = phieuDatVeDao.getTongDoanhThuThangHienTai();
 
         return Map.of(
             "chuyenXeList", chuyenXeList,
@@ -138,7 +143,11 @@ public class AdminApiController {
             "xeList", xeList,
             "nguoiDungList", nguoiDungList,
             "currentPage", page,
-            "totalPages", totalPages
+            "totalPages", totalPages,
+            "totalCustomer", totalCustomer,
+            "totalXe", totalXe,
+            "totalChuyenXe", totalChuyenXe,
+            "tongDoanhThuThangHienTai", tongDoanhThuThangHienTai
         );
     }
     
@@ -148,6 +157,9 @@ public class AdminApiController {
 
         XeDao xeDao = new XeDao();
         LoaiXeDao loaiXeDao = new LoaiXeDao();
+        ChuyenXeDao chuyenXeDao = new ChuyenXeDao();
+        NguoiDungDao nguoiDungDao = new NguoiDungDao();
+        PhieuDatVeDao phieuDatVeDao = new PhieuDatVeDao();
 
         int offset = (page - 1) * PAGE_SIZE;
         List<Xe> xeList = xeDao.getXeByPage(offset, PAGE_SIZE);
@@ -155,12 +167,20 @@ public class AdminApiController {
         
         long totalXe = xeDao.getTotalXe();
         int totalPages = (int) Math.ceil((double) totalXe / PAGE_SIZE);
+        
+        long totalCustomer = nguoiDungDao.getTotalNguoiDung(1);
+        long totalChuyenXe = chuyenXeDao.getTotalChuyenXe();
+        BigDecimal tongDoanhThuThangHienTai = phieuDatVeDao.getTongDoanhThuThangHienTai();
 
         return Map.of(
             "xeList", xeList,
             "loaiXeList", loaiXeList,
             "currentPage", page,
-            "totalPages", totalPages
+            "totalPages", totalPages,
+            "totalCustomer", totalCustomer,
+            "totalXe", totalXe,
+            "totalChuyenXe", totalChuyenXe,
+            "tongDoanhThuThangHienTai", tongDoanhThuThangHienTai
         );
     }
     
@@ -171,6 +191,10 @@ public class AdminApiController {
 
         QuanHuyenDao quanHuyenDao = new QuanHuyenDao();
         TinhThanhDao tinhThanhDao = new TinhThanhDao();
+        XeDao xeDao = new XeDao();
+        ChuyenXeDao chuyenXeDao = new ChuyenXeDao();
+        NguoiDungDao nguoiDungDao = new NguoiDungDao();
+        PhieuDatVeDao phieuDatVeDao = new PhieuDatVeDao();
 
         int offsetQuan = (pageQuan - 1) * PAGE_SIZE;
         List<QuanHuyen> quanHuyenList = quanHuyenDao.getQuanHuyenByPage(offsetQuan, PAGE_SIZE);
@@ -183,6 +207,11 @@ public class AdminApiController {
 
         long totalTinhThanh = tinhThanhDao.getTotalTinhThanh();
         int totalTinhPages = (int) Math.ceil((double) totalTinhThanh / PAGE_SIZE);
+        
+        long totalCustomer = nguoiDungDao.getTotalNguoiDung(1);
+        long totalXe = xeDao.getTotalXe();
+        long totalChuyenXe = chuyenXeDao.getTotalChuyenXe();
+        BigDecimal tongDoanhThuThangHienTai = phieuDatVeDao.getTongDoanhThuThangHienTai();
 
         return Map.of(
             "quanHuyenList", quanHuyenList,
@@ -190,14 +219,22 @@ public class AdminApiController {
             "currentQuanPage", pageQuan,
             "totalQuanPages", totalQuanPages,
             "currentTinhPage", pageTinh,
-            "totalTinhPages", totalTinhPages
+            "totalTinhPages", totalTinhPages,
+            "totalCustomer", totalCustomer,
+            "totalXe", totalXe,
+            "totalChuyenXe", totalChuyenXe,
+            "tongDoanhThuThangHienTai", tongDoanhThuThangHienTai
         );
     }
 
     @GetMapping("/ticket")
     public Map<String, Object> getAllBookingInfo(
             @RequestParam(value = "page", defaultValue = "1") int page) {
+    	
         PhieuDatVeDao phieuDatVeDao = new PhieuDatVeDao();
+        XeDao xeDao = new XeDao();
+        ChuyenXeDao chuyenXeDao = new ChuyenXeDao();
+        NguoiDungDao nguoiDungDao = new NguoiDungDao();
 
         int offset = (page - 1) * PAGE_SIZE;
 
@@ -205,11 +242,20 @@ public class AdminApiController {
 
         long total = phieuDatVeDao.getTotalBookingInfo();
         int totalPages = (int) Math.ceil((double) total / PAGE_SIZE);
+        
+        long totalCustomer = nguoiDungDao.getTotalNguoiDung(1);
+        long totalXe = xeDao.getTotalXe();
+        long totalChuyenXe = chuyenXeDao.getTotalChuyenXe();
+        BigDecimal tongDoanhThuThangHienTai = phieuDatVeDao.getTongDoanhThuThangHienTai();
 
         return Map.of(
             "bookingInfoList", bookingInfoList,
             "currentPage", page,
-            "totalPages", totalPages
+            "totalPages", totalPages,
+            "totalCustomer", totalCustomer,
+            "totalXe", totalXe,
+            "totalChuyenXe", totalChuyenXe,
+            "tongDoanhThuThangHienTai", tongDoanhThuThangHienTai
         );
     }
 
@@ -292,6 +338,27 @@ public class AdminApiController {
         } else {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Không tìm thấy tuyến xe hoặc lỗi trong quá trình xoá");
         }
+    }
+    
+    @GetMapping("/taikhoan")
+    public Map<String, Object> getTaiKhoan() {
+
+        NguoiDungDao nguoiDungDao = new NguoiDungDao();
+        XeDao xeDao = new XeDao();
+        ChuyenXeDao chuyenXeDao = new ChuyenXeDao();
+        PhieuDatVeDao phieuDatVeDao = new PhieuDatVeDao();
+
+        long totalCustomer = nguoiDungDao.getTotalNguoiDung(1);
+        long totalXe = xeDao.getTotalXe();
+        long totalChuyenXe = chuyenXeDao.getTotalChuyenXe();
+        BigDecimal tongDoanhThuThangHienTai = phieuDatVeDao.getTongDoanhThuThangHienTai();
+
+        return Map.of(
+            "totalCustomer", totalCustomer,
+            "totalXe", totalXe,
+            "totalChuyenXe", totalChuyenXe,
+            "tongDoanhThuThangHienTai", tongDoanhThuThangHienTai
+        );
     }
 
 }

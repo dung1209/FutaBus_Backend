@@ -350,7 +350,8 @@ public class UserApiController {
 	            "idNguoiDung", nguoiDung.getIdNguoiDung(),
 	            "idPhanQuyen", nguoiDung.getIdPhanQuyen(),
 	            "hoTen", nguoiDung.getHoTen(),
-	            "matKhau", nguoiDung.getMatKhau()
+	            "matKhau", nguoiDung.getMatKhau(),
+	            "email", nguoiDung.getEmail()
 	        ));
 	    } else {
 	        System.out.println("Đăng nhập thất bại - sai thông tin!");
