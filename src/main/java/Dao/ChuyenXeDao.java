@@ -15,6 +15,10 @@ import java.util.Date;
 import java.sql.Timestamp;
 import FutaBus.bean.ChuyenXe;
 import FutaBus.bean.ChuyenXeResult;
+import FutaBus.bean.ChuyenXeUpdateDTO;
+import FutaBus.bean.NguoiDung;
+import FutaBus.bean.TuyenXe;
+import FutaBus.bean.Xe;
 
 @Repository
 public class ChuyenXeDao {
@@ -33,7 +37,7 @@ public class ChuyenXeDao {
             session = factory.openSession();
             transaction = session.beginTransaction();
 
-            String hql = "from ChuyenXe";
+            String hql = "from ChuyenXe where trangThai != 0";
             Query<ChuyenXe> query = session.createQuery(hql, ChuyenXe.class);
             query.setFirstResult(offset);
             query.setMaxResults(limit);
@@ -63,7 +67,7 @@ public class ChuyenXeDao {
             }
             session = factory.openSession();
 
-            String hql = "select count(*) from ChuyenXe";
+            String hql = "select count(*) from ChuyenXe where trangThai != 0";
             Query<Long> query = session.createQuery(hql, Long.class);
             total = query.uniqueResult();
 
@@ -155,6 +159,115 @@ public class ChuyenXeDao {
             }
         }
         return chuyenXeResultList;
+    }
+    
+    public ChuyenXe getChuyenXeById(int idChuyenXe) {
+        ChuyenXe chuyenXe = null;
+        Session session = null;
+        Transaction transaction = null;
+
+        try {
+            if (factory == null) {
+                factory = HibernateUtils.getSessionFactory();
+            }
+
+            session = factory.openSession();
+            transaction = session.beginTransaction();
+
+            String hql = "FROM ChuyenXe WHERE idChuyenXe = :idChuyenXe";
+            Query<ChuyenXe> query = session.createQuery(hql, ChuyenXe.class);
+            query.setParameter("idChuyenXe", idChuyenXe);
+
+            chuyenXe = query.uniqueResult();
+
+            transaction.commit();
+        } catch (Exception e) {
+            if (transaction != null) transaction.rollback();
+            e.printStackTrace();
+        } finally {
+            if (session != null) session.close();
+        }
+
+        return chuyenXe;
+    }
+    
+    public boolean updateChuyenXe(ChuyenXe chuyenXe) {
+        Session session = null;
+        Transaction transaction = null;
+        boolean isUpdated = false;
+
+        try {
+            if (factory == null) {
+                factory = HibernateUtils.getSessionFactory();
+            }
+            session = factory.openSession();
+            transaction = session.beginTransaction();
+
+            ChuyenXe existingChuyenXe = session.get(ChuyenXe.class, chuyenXe.getIdChuyenXe());
+
+            if (existingChuyenXe != null) {
+                existingChuyenXe.setThoiDiemDi(chuyenXe.getThoiDiemDi());
+                existingChuyenXe.setThoiDiemDen(chuyenXe.getThoiDiemDen());
+                existingChuyenXe.setGiaVe(chuyenXe.getGiaVe());
+                existingChuyenXe.setTrangThai(chuyenXe.getTrangThai());
+
+                existingChuyenXe.setXe(chuyenXe.getXe());
+                existingChuyenXe.setTaiXe(chuyenXe.getTaiXe());
+                existingChuyenXe.setTuyenXe(chuyenXe.getTuyenXe());
+
+                session.update(existingChuyenXe);
+                transaction.commit();
+                isUpdated = true;
+            } else {
+                System.out.println("Chuyến xe không tồn tại");
+            }
+        } catch (Exception e) {
+            if (transaction != null) {
+                transaction.rollback();
+            }
+            e.printStackTrace();
+        } finally {
+            if (session != null) {
+                session.close();
+            }
+        }
+
+        return isUpdated;
+    }
+    
+    public boolean xoaChuyenXe(int id) {
+        Session session = null;
+        Transaction transaction = null;
+
+        try {
+            if (factory == null) {
+                factory = HibernateUtils.getSessionFactory();
+            }
+
+            session = factory.openSession();
+            transaction = session.beginTransaction();
+
+            ChuyenXe chuyenXe = session.get(ChuyenXe.class, id);
+            if (chuyenXe != null) {
+            	chuyenXe.setTrangThai(0);
+                session.update(chuyenXe);
+                transaction.commit();
+                return true;
+            } else {
+                return false;
+            }
+
+        } catch (Exception e) {
+            if (transaction != null) {
+                transaction.rollback();
+            }
+            e.printStackTrace();
+            return false;
+        } finally {
+            if (session != null) {
+                session.close();
+            }
+        }
     }
     
 }

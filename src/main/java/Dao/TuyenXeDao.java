@@ -178,5 +178,35 @@ public class TuyenXeDao {
             }
         }
     }
+    
+    public List<TuyenXe> getAllTuyenXe() {
+        List<TuyenXe> tuyenXeList = new ArrayList<>();
+        Session session = null;
+        Transaction transaction = null;
+
+        try {
+            if (factory == null) {
+                factory = HibernateUtils.getSessionFactory();
+            }
+            session = factory.openSession();
+            transaction = session.beginTransaction();
+
+            String hql = "from TuyenXe where trangThai != 0";
+            Query<TuyenXe> query = session.createQuery(hql, TuyenXe.class);
+
+            tuyenXeList = query.getResultList();
+            transaction.commit();
+        } catch (Exception e) {
+            if (transaction != null) {
+                transaction.rollback();
+            }
+            e.printStackTrace();
+        } finally {
+            if (session != null) {
+                session.close();
+            }
+        }
+        return tuyenXeList;
+    }
 
 }

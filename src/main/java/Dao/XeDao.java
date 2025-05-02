@@ -70,4 +70,34 @@ public class XeDao {
         }
         return total;
     }
+    
+    public List<Xe> getAllXe() {
+        List<Xe> xeList = new ArrayList<>();
+        Session session = null;
+        Transaction transaction = null;
+
+        try {
+            if (factory == null) {
+                factory = HibernateUtils.getSessionFactory();
+            }
+            session = factory.openSession();
+            transaction = session.beginTransaction();
+
+            String hql = "from Xe";
+            Query<Xe> query = session.createQuery(hql, Xe.class);
+
+            xeList = query.getResultList();
+            transaction.commit();
+        } catch (Exception e) {
+            if (transaction != null) {
+                transaction.rollback();
+            }
+            e.printStackTrace();
+        } finally {
+            if (session != null) {
+                session.close();
+            }
+        }
+        return xeList;
+    }
 }

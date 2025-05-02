@@ -311,4 +311,34 @@ public class NguoiDungDao {
         }
     }
     
+    public List<NguoiDung> getTaiXe() {
+        List<NguoiDung> nguoiDungList = new ArrayList<>();
+        Session session = null;
+        Transaction transaction = null;
+
+        try {
+            if (factory == null) {
+                factory = HibernateUtils.getSessionFactory();
+            }
+            session = factory.openSession();
+            transaction = session.beginTransaction();
+
+            String hql = "from NguoiDung where idPhanQuyen = 3";
+            Query<NguoiDung> query = session.createQuery(hql, NguoiDung.class);
+
+            nguoiDungList = query.getResultList();
+            transaction.commit();
+        } catch (Exception e) {
+            if (transaction != null) {
+                transaction.rollback();
+            }
+            e.printStackTrace();
+        } finally {
+            if (session != null) {
+                session.close();
+            }
+        }
+        return nguoiDungList;
+    }
+    
 }

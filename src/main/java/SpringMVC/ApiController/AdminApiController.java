@@ -1,9 +1,12 @@
 package SpringMVC.ApiController;
 
 import java.math.BigDecimal;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TimeZone;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -30,6 +33,7 @@ import Dao.XeDao;
 import FutaBus.bean.BenXe;
 import FutaBus.bean.BookingInfo;
 import FutaBus.bean.ChuyenXe;
+import FutaBus.bean.ChuyenXeUpdateDTO;
 import FutaBus.bean.NguoiDung;
 import FutaBus.bean.QuanHuyen;
 import FutaBus.bean.TinhThanh;
@@ -124,14 +128,14 @@ public class AdminApiController {
         NguoiDungDao nguoiDungDao = new NguoiDungDao();
         PhieuDatVeDao phieuDatVeDao = new PhieuDatVeDao();
 
-        int offset = (page - 1) * 4;
-        List<ChuyenXe> chuyenXeList = chuyenXeDao.getChuyenXeByPage(offset, 4);
-        List<TuyenXe> tuyenXeList = tuyenXeDao.getTuyenXeByPage(offset, 4);
-        List<Xe> xeList = xeDao.getXeByPage(offset, 4);
-        List<NguoiDung> nguoiDungList = nguoiDungDao.getNguoiDungByPage(offset, 4, 1);
+        int offset = (page - 1) * PAGE_SIZE;
+        List<ChuyenXe> chuyenXeList = chuyenXeDao.getChuyenXeByPage(offset, PAGE_SIZE);
+        List<TuyenXe> tuyenXeList = tuyenXeDao.getAllTuyenXe();
+        List<Xe> xeList = xeDao.getAllXe();
+        List<NguoiDung> nguoiDungList = nguoiDungDao.getTaiXe();
         
         long totalChuyenXe = chuyenXeDao.getTotalChuyenXe();
-        int totalPages = (int) Math.ceil((double) totalChuyenXe / 4);
+        int totalPages = (int) Math.ceil((double) totalChuyenXe / PAGE_SIZE);
         
         long totalCustomer = nguoiDungDao.getTotalNguoiDung(1);
         long totalXe = xeDao.getTotalXe();
@@ -334,7 +338,7 @@ public class AdminApiController {
         boolean thanhCong = tuyenXeDao.xoaTuyenXe(id);
 
         if (thanhCong) {
-            return ResponseEntity.ok("Xoá người dùng (mềm) thành công");
+            return ResponseEntity.ok("Xoá tuyến xe (mềm) thành công");
         } else {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Không tìm thấy tuyến xe hoặc lỗi trong quá trình xoá");
         }
@@ -359,6 +363,83 @@ public class AdminApiController {
             "totalChuyenXe", totalChuyenXe,
             "tongDoanhThuThangHienTai", tongDoanhThuThangHienTai
         );
+    }
+    
+    @PostMapping("/update-chuyenxe")
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> updateChuyenXe(@RequestBody ChuyenXeUpdateDTO chuyenXeDto) {
+        Map<String, Object> response = new HashMap<>();
+
+        if (chuyenXeDto == null || chuyenXeDto.getIdChuyenXe() == 0) {
+            response.put("success", false);
+            response.put("message", "Thông tin chuyến xe không hợp lệ!");
+            return ResponseEntity.badRequest().body(response);
+        }
+
+        try {
+            ChuyenXeDao chuyenXeDao = new ChuyenXeDao();
+
+            ChuyenXe chuyenXe = chuyenXeDao.getChuyenXeById(chuyenXeDto.getIdChuyenXe());
+
+            if (chuyenXe == null) {
+                response.put("success", false);
+                response.put("message", "Chuyến xe không tồn tại!");
+                return ResponseEntity.badRequest().body(response);
+            }
+
+            SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+            sdf.setTimeZone(TimeZone.getTimeZone("Asia/Ho_Chi_Minh"));
+            Date thoiDiemDi = sdf.parse(chuyenXeDto.getThoiDiemDi());
+            Date thoiDiemDen = sdf.parse(chuyenXeDto.getThoiDiemDen());
+            
+            System.out.println("Thời điểm đi sau khi chuyển đổi: " + thoiDiemDi);
+            System.out.println("Thời điểm đến sau khi chuyển đổi: " + thoiDiemDen);
+
+            chuyenXe.setThoiDiemDi(thoiDiemDi);
+            chuyenXe.setThoiDiemDen(thoiDiemDen);
+            chuyenXe.setGiaVe(chuyenXeDto.getGiaVe());
+            chuyenXe.setTrangThai(chuyenXeDto.getTrangThai());
+
+            Xe xe = new Xe();
+            xe.setIdXe(chuyenXeDto.getIdXe());
+            chuyenXe.setXe(xe);
+
+            NguoiDung taiXe = new NguoiDung();
+            taiXe.setIdNguoiDung(chuyenXeDto.getIdTaiXe());
+            chuyenXe.setTaiXe(taiXe);
+
+            TuyenXe tuyenXe = new TuyenXe();
+            tuyenXe.setIdTuyenXe(chuyenXeDto.getIdTuyenXe());
+            chuyenXe.setTuyenXe(tuyenXe);
+
+            boolean isUpdated = chuyenXeDao.updateChuyenXe(chuyenXe);
+
+            if (isUpdated) {
+                response.put("success", true);
+                response.put("message", "Cập nhật chuyến xe thành công!");
+                return ResponseEntity.ok(response);
+            } else {
+                response.put("success", false);
+                response.put("message", "Cập nhật chuyến xe thất bại!");
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+            }
+        } catch (Exception e) {
+            response.put("success", false);
+            response.put("message", "Lỗi khi cập nhật: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
+    }
+    
+    @PutMapping("/chuyenxe/xoa/{id}")
+    public ResponseEntity<String> xoaChuyenXe(@PathVariable("id") int id) {
+        ChuyenXeDao chuyenXeDao = new ChuyenXeDao();
+        boolean thanhCong = chuyenXeDao.xoaChuyenXe(id);
+
+        if (thanhCong) {
+            return ResponseEntity.ok("Xoá chuyến xe (mềm) thành công");
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Không tìm thấy chuyến xe hoặc lỗi trong quá trình xoá");
+        }
     }
 
 }
