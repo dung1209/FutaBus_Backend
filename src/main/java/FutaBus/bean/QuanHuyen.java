@@ -17,14 +17,18 @@ public class QuanHuyen {
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "idTinhThanh", nullable = false)
     private TinhThanh tinhThanh;
+    
+    @Column(name = "trangThai")
+    private int trangThai;
 
     public QuanHuyen() {
     }
 
-    public QuanHuyen(int idQuanHuyen, String tenQuanHuyen, TinhThanh tinhThanh) {
+    public QuanHuyen(int idQuanHuyen, String tenQuanHuyen, TinhThanh tinhThanh, int trangThai) {
         this.idQuanHuyen = idQuanHuyen;
         this.tenQuanHuyen = tenQuanHuyen;
         this.tinhThanh = tinhThanh;
+        this.trangThai = trangThai;
     }
 
     public int getIdQuanHuyen() {
@@ -51,10 +55,19 @@ public class QuanHuyen {
         this.tinhThanh = tinhThanh;
     }
 
-    @Override
+    public int getTrangThai() {
+		return trangThai;
+	}
+
+	public void setTrangThai(int trangThai) {
+		this.trangThai = trangThai;
+	}
+
+	@Override
     public String toString() {
         return "QuanHuyen{" +
                 "idQuanHuyen=" + idQuanHuyen +
+                "trangThai=" + trangThai +
                 ", tenQuanHuyen='" + tenQuanHuyen + '\'' +
                 ", tinhThanh=" + (tinhThanh != null ? tinhThanh.getTenTinh() : "N/A") +
                 '}';

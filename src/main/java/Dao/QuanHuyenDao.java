@@ -8,7 +8,10 @@ import org.hibernate.Transaction;
 import org.hibernate.query.Query;
 import HibernateUtils.HibernateUtils;
 import java.util.ArrayList;
+
+import FutaBus.bean.ChuyenXe;
 import FutaBus.bean.QuanHuyen;
+import FutaBus.bean.Xe;
 
 @Repository
 public class QuanHuyenDao {
@@ -27,7 +30,7 @@ public class QuanHuyenDao {
             session = factory.openSession();
             transaction = session.beginTransaction();
 
-            String hql = "from QuanHuyen";
+            String hql = "from QuanHuyen where trangThai != 0";
             Query<QuanHuyen> query = session.createQuery(hql, QuanHuyen.class);
             query.setFirstResult(offset);
             query.setMaxResults(limit);
@@ -57,7 +60,7 @@ public class QuanHuyenDao {
             }
             session = factory.openSession();
 
-            String hql = "select count(*) from QuanHuyen";
+            String hql = "select count(*) from QuanHuyen where trangThai != 0";
             Query<Long> query = session.createQuery(hql, Long.class);
             total = query.uniqueResult();
 
@@ -99,6 +102,111 @@ public class QuanHuyenDao {
             }
         }
         return quanHuyenList;
+    }
+    
+    public QuanHuyen getQuanHuyenById(int idQuanHuyen) {
+    	QuanHuyen quanHuyen = null;
+        Session session = null;
+        Transaction transaction = null;
+
+        try {
+            if (factory == null) {
+                factory = HibernateUtils.getSessionFactory();
+            }
+
+            session = factory.openSession();
+            transaction = session.beginTransaction();
+
+            String hql = "FROM QuanHuyen WHERE idQuanHuyen = :idQuanHuyen";
+            Query<QuanHuyen> query = session.createQuery(hql, QuanHuyen.class);
+            query.setParameter("idQuanHuyen", idQuanHuyen);
+
+            quanHuyen = query.uniqueResult();
+
+            transaction.commit();
+        } catch (Exception e) {
+            if (transaction != null) transaction.rollback();
+            e.printStackTrace();
+        } finally {
+            if (session != null) session.close();
+        }
+
+        return quanHuyen;
+    }
+    
+    public boolean updateQuanHuyen(QuanHuyen quanHuyen) {
+        Session session = null;
+        Transaction transaction = null;
+        boolean isUpdated = false;
+
+        try {
+            if (factory == null) {
+                factory = HibernateUtils.getSessionFactory();
+            }
+            session = factory.openSession();
+            transaction = session.beginTransaction();
+
+            QuanHuyen existingQuanHuyen = session.get(QuanHuyen.class, quanHuyen.getIdQuanHuyen());
+
+            if (existingQuanHuyen != null) {
+                existingQuanHuyen.setTenQuanHuyen(quanHuyen.getTenQuanHuyen());
+
+                if (quanHuyen.getTinhThanh() != null) {
+                    existingQuanHuyen.setTinhThanh(quanHuyen.getTinhThanh());
+                }
+
+                session.update(existingQuanHuyen);
+                transaction.commit();
+                isUpdated = true;
+            } else {
+                System.out.println("Quận/Huyện không tồn tại");
+            }
+        } catch (Exception e) {
+            if (transaction != null) {
+                transaction.rollback();
+            }
+            e.printStackTrace();
+        } finally {
+            if (session != null) {
+                session.close();
+            }
+        }
+        return isUpdated;
+    }
+    
+    public boolean xoaQuanHuyen(int id) {
+        Session session = null;
+        Transaction transaction = null;
+
+        try {
+            if (factory == null) {
+                factory = HibernateUtils.getSessionFactory();
+            }
+
+            session = factory.openSession();
+            transaction = session.beginTransaction();
+
+            QuanHuyen quanHuyen = session.get(QuanHuyen.class, id);
+            if (quanHuyen != null) {
+            	quanHuyen.setTrangThai(0);
+                session.update(quanHuyen);
+                transaction.commit();
+                return true;
+            } else {
+                return false;
+            }
+
+        } catch (Exception e) {
+            if (transaction != null) {
+                transaction.rollback();
+            }
+            e.printStackTrace();
+            return false;
+        } finally {
+            if (session != null) {
+                session.close();
+            }
+        }
     }
 
 }

@@ -20,15 +20,19 @@ public class Xe {
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "idLoaiXe", nullable = false)
     private LoaiXe loaiXe;
+    
+    @Column(name = "trangThai")
+    private int trangThai;
 
     public Xe() {
     }
 
-    public Xe(int idXe, String bienSo, String tenXe, LoaiXe loaiXe) {
+    public Xe(int idXe, String bienSo, String tenXe, LoaiXe loaiXe, int trangThai) {
         this.idXe = idXe;
         this.bienSo = bienSo;
         this.tenXe = tenXe;
         this.loaiXe = loaiXe;
+        this.trangThai = trangThai;
     }
 
     public int getIdXe() {
@@ -69,7 +73,16 @@ public class Xe {
                 "idXe=" + idXe +
                 ", bienSo='" + bienSo + '\'' +
                 ", tenXe='" + tenXe + '\'' +
+                ", trangThai='" + trangThai + '\'' +
                 ", loaiXe=" + (loaiXe != null ? loaiXe.getTenLoai() : "null") +
                 '}';
     }
+
+	public int getTrangThai() {
+		return trangThai;
+	}
+
+	public void setTrangThai(int trangThai) {
+		this.trangThai = trangThai;
+	}
 }

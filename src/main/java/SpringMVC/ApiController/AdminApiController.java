@@ -36,10 +36,12 @@ import FutaBus.bean.ChuyenXe;
 import FutaBus.bean.ChuyenXeUpdateDTO;
 import FutaBus.bean.NguoiDung;
 import FutaBus.bean.QuanHuyen;
+import FutaBus.bean.QuanHuyenUpdateDTO;
 import FutaBus.bean.TinhThanh;
 import FutaBus.bean.TuyenXe;
 import FutaBus.bean.TuyenXeUpdateDTO;
 import FutaBus.bean.Xe;
+import FutaBus.bean.XeUpdateDTO;
 import FutaBus.bean.LoaiXe;
 
 @CrossOrigin(origins = "http://localhost:8086", allowCredentials = "true")
@@ -205,6 +207,7 @@ public class AdminApiController {
 
         int offsetTinh = (pageTinh - 1) * PAGE_SIZE;
         List<TinhThanh> tinhThanhList = tinhThanhDao.getTinhThanhByPage(offsetTinh, PAGE_SIZE);
+        List<TinhThanh> tinhThanhAllList = tinhThanhDao.getAllTinhThanh();
 
         long totalQuanHuyen = quanHuyenDao.getTotalQuanHuyen();
         int totalQuanPages = (int) Math.ceil((double) totalQuanHuyen / PAGE_SIZE);
@@ -217,18 +220,20 @@ public class AdminApiController {
         long totalChuyenXe = chuyenXeDao.getTotalChuyenXe();
         BigDecimal tongDoanhThuThangHienTai = phieuDatVeDao.getTongDoanhThuThangHienTai();
 
-        return Map.of(
-            "quanHuyenList", quanHuyenList,
-            "tinhThanhList", tinhThanhList,
-            "currentQuanPage", pageQuan,
-            "totalQuanPages", totalQuanPages,
-            "currentTinhPage", pageTinh,
-            "totalTinhPages", totalTinhPages,
-            "totalCustomer", totalCustomer,
-            "totalXe", totalXe,
-            "totalChuyenXe", totalChuyenXe,
-            "tongDoanhThuThangHienTai", tongDoanhThuThangHienTai
+        return Map.ofEntries(
+        	    Map.entry("quanHuyenList", quanHuyenList),
+        	    Map.entry("tinhThanhList", tinhThanhList),
+        	    Map.entry("currentQuanPage", pageQuan),
+        	    Map.entry("totalQuanPages", totalQuanPages),
+        	    Map.entry("currentTinhPage", pageTinh),
+        	    Map.entry("totalTinhPages", totalTinhPages),
+        	    Map.entry("totalCustomer", totalCustomer),
+        	    Map.entry("totalXe", totalXe),
+        	    Map.entry("totalChuyenXe", totalChuyenXe),
+        	    Map.entry("tongDoanhThuThangHienTai", tongDoanhThuThangHienTai),
+        	    Map.entry("tinhThanhAllList", tinhThanhAllList)
         );
+
     }
 
     @GetMapping("/ticket")
@@ -439,6 +444,166 @@ public class AdminApiController {
             return ResponseEntity.ok("Xoá chuyến xe (mềm) thành công");
         } else {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Không tìm thấy chuyến xe hoặc lỗi trong quá trình xoá");
+        }
+    }
+    
+    @PostMapping("/update-xe")
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> updateXe(@RequestBody XeUpdateDTO xeDto) {
+        Map<String, Object> response = new HashMap<>();
+
+        if (xeDto == null || xeDto.getIdXe() == 0) {
+            response.put("success", false);
+            response.put("message", "Thông tin xe không hợp lệ!");
+            return ResponseEntity.badRequest().body(response);
+        }
+
+        try {
+            XeDao xeDao = new XeDao();
+            Xe xe = xeDao.getXeById(xeDto.getIdXe());
+
+            if (xe == null) {
+                response.put("success", false);
+                response.put("message", "Xe không tồn tại!");
+                return ResponseEntity.badRequest().body(response);
+            }
+
+            xe.setTenXe(xeDto.getTenXe());
+            xe.setBienSo(xeDto.getBienSo());
+
+            LoaiXe loaiXe = new LoaiXe();
+            loaiXe.setIdLoaiXe(xeDto.getIdLoaiXe());
+            xe.setLoaiXe(loaiXe);
+
+            boolean isUpdated = xeDao.updateXe(xe);
+
+            if (isUpdated) {
+                response.put("success", true);
+                response.put("message", "Cập nhật xe thành công!");
+                return ResponseEntity.ok(response);
+            } else {
+                response.put("success", false);
+                response.put("message", "Cập nhật xe thất bại!");
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+            }
+        } catch (Exception e) {
+            response.put("success", false);
+            response.put("message", "Lỗi khi cập nhật: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
+    }
+    
+    @PutMapping("/xe/xoa/{id}")
+    public ResponseEntity<String> xoaXe(@PathVariable("id") int id) {
+        XeDao xeDao = new XeDao();
+        boolean thanhCong = xeDao.xoaXe(id);
+
+        if (thanhCong) {
+            return ResponseEntity.ok("Xoá xe (mềm) thành công");
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Không tìm thấy xe hoặc lỗi trong quá trình xoá");
+        }
+    }
+    
+    @PostMapping("/update-quanhuyen")
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> updateQuanHuyen(@RequestBody QuanHuyenUpdateDTO quanHuyen) {
+        Map<String, Object> response = new HashMap<>();
+
+        System.out.println("Giá trị quận/huyện nhận được: " + quanHuyen);
+
+        if (quanHuyen == null || quanHuyen.getIdQuanHuyen() == 0) {
+            response.put("success", false);
+            response.put("message", "Thông tin quận/huyện không hợp lệ!");
+            return ResponseEntity.badRequest().body(response);
+        }
+
+        try {
+            QuanHuyenDao quanHuyenDao = new QuanHuyenDao();
+            QuanHuyen existing = quanHuyenDao.getQuanHuyenById(quanHuyen.getIdQuanHuyen());
+
+            if (existing == null) {
+                response.put("success", false);
+                response.put("message", "Không tìm thấy quận/huyện để cập nhật!");
+                return ResponseEntity.badRequest().body(response);
+            }
+
+            existing.setTenQuanHuyen(quanHuyen.getTenQuanHuyen());
+
+            TinhThanh tinh = new TinhThanh();
+            tinh.setIdTinhThanh(quanHuyen.getIdTinhThanh());
+            existing.setTinhThanh(tinh);
+
+            quanHuyenDao.updateQuanHuyen(existing);
+
+            response.put("success", true);
+            response.put("message", "Cập nhật quận/huyện thành công!");
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            response.put("success", false);
+            response.put("message", "Lỗi khi cập nhật: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
+    }
+    
+    @PutMapping("/quanhuyen/xoa/{id}")
+    public ResponseEntity<String> xoaQuanHuyen(@PathVariable("id") int id) {
+        QuanHuyenDao quanHuyenDao = new QuanHuyenDao();
+        boolean thanhCong = quanHuyenDao.xoaQuanHuyen(id);
+
+        if (thanhCong) {
+            return ResponseEntity.ok("Xoá quận/huyện (mềm) thành công");
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Không tìm thấy quận/huyện hoặc lỗi trong quá trình xoá");
+        }
+    }
+    
+    @PostMapping("/update-tinhthanh")
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> updateTinhThanh(@RequestBody TinhThanh tinhThanhRequest) {
+        Map<String, Object> response = new HashMap<>();
+        
+        System.out.println("Dữ liệu tỉnh/thành nhận được: " + tinhThanhRequest);
+
+        if (tinhThanhRequest == null || tinhThanhRequest.getIdTinhThanh() == 0 || tinhThanhRequest.getTenTinh() == null || tinhThanhRequest.getTenTinh().trim().isEmpty()) {
+            response.put("success", false);
+            response.put("message", "Thông tin tỉnh/thành không hợp lệ!");
+            return ResponseEntity.badRequest().body(response);
+        }
+
+        try {
+            TinhThanhDao tinhThanhDao = new TinhThanhDao();
+            TinhThanh existingTinh = tinhThanhDao.getTinhThanhById(tinhThanhRequest.getIdTinhThanh());
+
+            if (existingTinh == null) {
+                response.put("success", false);
+                response.put("message", "Tỉnh/Thành không tồn tại!");
+                return ResponseEntity.badRequest().body(response);
+            }
+
+            existingTinh.setTenTinh(tinhThanhRequest.getTenTinh().trim());
+            tinhThanhDao.updateTinhThanh(existingTinh);
+
+            response.put("success", true);
+            response.put("message", "Cập nhật tỉnh/thành thành công!");
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            e.printStackTrace();
+            response.put("success", false);
+            response.put("message", "Lỗi khi cập nhật: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
+    }
+    
+    @PutMapping("/tinhthanh/xoa/{id}")
+    public ResponseEntity<String> xoaTinhThanh(@PathVariable("id") int id) {
+        TinhThanhDao tinhThanhDao = new TinhThanhDao();
+        boolean thanhCong = tinhThanhDao.xoaTinhThanh(id);
+
+        if (thanhCong) {
+            return ResponseEntity.ok("Xoá tỉnh thành (mềm) thành công");
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Không tìm thấy tỉnh thành hoặc lỗi trong quá trình xoá");
         }
     }
 

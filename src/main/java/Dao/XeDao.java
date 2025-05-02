@@ -8,6 +8,8 @@ import org.hibernate.Transaction;
 import org.hibernate.query.Query;
 import HibernateUtils.HibernateUtils;
 import java.util.ArrayList;
+
+import FutaBus.bean.ChuyenXe;
 import FutaBus.bean.Xe;
 
 @Repository
@@ -27,7 +29,7 @@ public class XeDao {
             session = factory.openSession();
             transaction = session.beginTransaction();
 
-            String hql = "from Xe";
+            String hql = "from Xe where trangThai != 0 ";
             Query<Xe> query = session.createQuery(hql, Xe.class);
             query.setFirstResult(offset);
             query.setMaxResults(limit);
@@ -57,7 +59,7 @@ public class XeDao {
             }
             session = factory.openSession();
 
-            String hql = "select count(*) from Xe";
+            String hql = "select count(*) from Xe where trangThai != 0 ";
             Query<Long> query = session.createQuery(hql, Long.class);
             total = query.uniqueResult();
 
@@ -100,4 +102,108 @@ public class XeDao {
         }
         return xeList;
     }
+    
+    public Xe getXeById(int idXe) {
+        Xe xe = null;
+        Session session = null;
+        Transaction transaction = null;
+
+        try {
+            if (factory == null) {
+                factory = HibernateUtils.getSessionFactory();
+            }
+
+            session = factory.openSession();
+            transaction = session.beginTransaction();
+
+            String hql = "FROM Xe WHERE idXe = :idXe";
+            Query<Xe> query = session.createQuery(hql, Xe.class);
+            query.setParameter("idXe", idXe);
+
+            xe = query.uniqueResult();
+
+            transaction.commit();
+        } catch (Exception e) {
+            if (transaction != null) transaction.rollback();
+            e.printStackTrace();
+        } finally {
+            if (session != null) session.close();
+        }
+        return xe;
+    }
+    
+    public boolean updateXe(Xe xe) {
+        Session session = null;
+        Transaction transaction = null;
+        boolean isUpdated = false;
+
+        try {
+            if (factory == null) {
+                factory = HibernateUtils.getSessionFactory();
+            }
+            session = factory.openSession();
+            transaction = session.beginTransaction();
+
+            Xe existingXe = session.get(Xe.class, xe.getIdXe());
+
+            if (existingXe != null) {
+                existingXe.setTenXe(xe.getTenXe());
+                existingXe.setBienSo(xe.getBienSo());
+                existingXe.setLoaiXe(xe.getLoaiXe());
+
+                session.update(existingXe);
+                transaction.commit();
+                isUpdated = true;
+            } else {
+                System.out.println("Xe không tồn tại");
+            }
+        } catch (Exception e) {
+            if (transaction != null) {
+                transaction.rollback();
+            }
+            e.printStackTrace();
+        } finally {
+            if (session != null) {
+                session.close();
+            }
+        }
+
+        return isUpdated;
+    }
+    
+    public boolean xoaXe(int id) {
+        Session session = null;
+        Transaction transaction = null;
+
+        try {
+            if (factory == null) {
+                factory = HibernateUtils.getSessionFactory();
+            }
+
+            session = factory.openSession();
+            transaction = session.beginTransaction();
+
+            Xe xe = session.get(Xe.class, id);
+            if (xe != null) {
+            	xe.setTrangThai(0);
+                session.update(xe);
+                transaction.commit();
+                return true;
+            } else {
+                return false;
+            }
+
+        } catch (Exception e) {
+            if (transaction != null) {
+                transaction.rollback();
+            }
+            e.printStackTrace();
+            return false;
+        } finally {
+            if (session != null) {
+                session.close();
+            }
+        }
+    }
+    
 }
