@@ -12,6 +12,7 @@ import org.hibernate.query.Query;
 import HibernateUtils.HibernateUtils;
 
 import java.math.BigDecimal;
+import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -243,6 +244,40 @@ public class PhieuDatVeDao {
 	            session.close();
 	    }
 	    return list;
+	}
+	
+	public List<Object[]> getDoanhThuTheoNgay(String startDate, String endDate) {
+	    List<Object[]> result = new ArrayList<>();
+	    Session session = null;
+
+	    try {
+	        session = HibernateUtils.getSessionFactory().openSession();
+
+	        String hql = "SELECT p.thoiGianDatVe, SUM(p.tongTien) " +
+	                     "FROM PhieuDatVe p " +
+	                     "WHERE p.trangThai IN (3, 4) " +
+	                     "AND p.thoiGianDatVe >= :start " +
+	                     "AND p.thoiGianDatVe < :end " +
+	                     "GROUP BY p.thoiGianDatVe " +
+	                     "ORDER BY p.thoiGianDatVe";
+
+	        Timestamp startTimestamp = Timestamp.valueOf(startDate + " 00:00:00");
+	        Timestamp endTimestamp = Timestamp.valueOf(endDate + " 23:59:59");
+
+	        Query<Object[]> query = session.createQuery(hql, Object[].class);
+	        query.setParameter("start", startTimestamp);
+	        query.setParameter("end", endTimestamp);
+
+	        result = query.getResultList();
+
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	    } finally {
+	        if (session != null) {
+	            session.close();
+	        }
+	    }
+	    return result;
 	}
 
 }

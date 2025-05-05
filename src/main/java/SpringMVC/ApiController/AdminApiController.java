@@ -2,8 +2,12 @@ package SpringMVC.ApiController;
 
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
@@ -605,6 +609,62 @@ public class AdminApiController {
         } else {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Không tìm thấy tỉnh thành hoặc lỗi trong quá trình xoá");
         }
+    }
+    
+    @GetMapping("/thongke")
+    public Map<String, Object> getThongKe(@RequestParam(required = false) String startDate,
+            @RequestParam(required = false) String endDate) {
+        NguoiDungDao nguoiDungDao = new NguoiDungDao();
+        XeDao xeDao = new XeDao();
+        ChuyenXeDao chuyenXeDao = new ChuyenXeDao();
+        PhieuDatVeDao phieuDatVeDao = new PhieuDatVeDao();
+
+        long totalCustomer = nguoiDungDao.getTotalNguoiDung(1);
+        long totalXe = xeDao.getTotalXe();
+        long totalChuyenXe = chuyenXeDao.getTotalChuyenXe();
+        BigDecimal tongDoanhThuThangHienTai = phieuDatVeDao.getTongDoanhThuThangHienTai();
+        List<String> ngayList = new ArrayList<>();
+        List<BigDecimal> tongTienList = new ArrayList<>();
+        
+        if (startDate != null && endDate != null) {
+        	DateTimeFormatter inputFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+
+        	DateTimeFormatter outputFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+
+        	LocalDate startDateParsed = LocalDate.parse(startDate, inputFormatter);
+        	LocalDate endDateParsed = LocalDate.parse(endDate, inputFormatter);
+
+        	String formattedStartDate = startDateParsed.format(outputFormatter);
+        	String formattedEndDate = endDateParsed.format(outputFormatter);
+        	
+        	List<Object[]> doanhThuList = phieuDatVeDao.getDoanhThuTheoNgay(formattedStartDate, formattedEndDate);
+        	
+        	Map<String, BigDecimal> tongTienTheoNgay = new LinkedHashMap<>(); 
+
+        	for (Object[] row : doanhThuList) {
+        	    Date ngay = (Date) row[0];
+        	    BigDecimal tongTien = (BigDecimal) row[1];
+
+        	    String formattedDate = new SimpleDateFormat("yyyy-MM-dd").format(ngay);
+        	    
+        	    tongTienTheoNgay.put(formattedDate, tongTienTheoNgay.getOrDefault(formattedDate, BigDecimal.ZERO).add(tongTien));
+        	}
+        	
+        	ngayList = new ArrayList<>(tongTienTheoNgay.keySet());
+        	tongTienList = new ArrayList<>(tongTienTheoNgay.values());
+        }
+        
+        System.out.println("ngayList:" + ngayList);
+    	System.out.println("tongTienList:" + tongTienList);
+
+        return Map.of(
+            "totalCustomer", totalCustomer,
+            "totalXe", totalXe,
+            "totalChuyenXe", totalChuyenXe,
+            "tongDoanhThuThangHienTai", tongDoanhThuThangHienTai,
+            "ngayList", ngayList,
+        	"tongTienList", tongTienList
+        );
     }
 
 }
