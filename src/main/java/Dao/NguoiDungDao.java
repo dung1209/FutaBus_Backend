@@ -341,4 +341,33 @@ public class NguoiDungDao {
         return nguoiDungList;
     }
     
+    public boolean themNguoiDung(NguoiDung nguoiDung) {
+        Transaction transaction = null;
+        Session session = null;
+
+        try {
+            if (factory == null) {
+                factory = HibernateUtils.getSessionFactory();
+            }
+
+            session = factory.openSession();
+            transaction = session.beginTransaction();
+
+            session.save(nguoiDung);
+
+            transaction.commit();
+            return true;
+        } catch (Exception e) {
+            if (transaction != null) {
+                transaction.rollback();
+            }
+            e.printStackTrace();
+            return false;
+        } finally {
+            if (session != null) {
+                session.close();
+            }
+        }
+    }
+    
 }

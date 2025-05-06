@@ -86,7 +86,7 @@ public class QuanHuyenDao {
             session = factory.openSession();
             transaction = session.beginTransaction();
 
-            String hql = "FROM QuanHuyen";
+            String hql = "FROM QuanHuyen where trangThai != 0";
             Query<QuanHuyen> query = session.createQuery(hql, QuanHuyen.class);
             quanHuyenList = query.getResultList();
 
@@ -202,6 +202,34 @@ public class QuanHuyenDao {
             }
             e.printStackTrace();
             return false;
+        } finally {
+            if (session != null) {
+                session.close();
+            }
+        }
+    }
+    
+    public QuanHuyen themQuanHuyen(QuanHuyen quanHuyen) {
+        Transaction transaction = null;
+        Session session = null;
+        try {
+            if (factory == null) {
+                factory = HibernateUtils.getSessionFactory();
+            }
+
+            session = factory.openSession();
+            transaction = session.beginTransaction();
+
+            session.save(quanHuyen);
+
+            transaction.commit();
+            return quanHuyen;
+        } catch (Exception e) {
+            if (transaction != null) {
+                transaction.rollback();
+            }
+            e.printStackTrace();
+            return null;
         } finally {
             if (session != null) {
                 session.close();

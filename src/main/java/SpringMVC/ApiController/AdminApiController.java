@@ -3,6 +3,7 @@ package SpringMVC.ApiController;
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
+import java.time.Year;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Date;
@@ -39,6 +40,7 @@ import FutaBus.bean.BookingInfo;
 import FutaBus.bean.ChuyenXe;
 import FutaBus.bean.ChuyenXeUpdateDTO;
 import FutaBus.bean.NguoiDung;
+import FutaBus.bean.PhieuDatVe;
 import FutaBus.bean.QuanHuyen;
 import FutaBus.bean.QuanHuyenUpdateDTO;
 import FutaBus.bean.TinhThanh;
@@ -665,6 +667,344 @@ public class AdminApiController {
             "ngayList", ngayList,
         	"tongTienList", tongTienList
         );
+    }
+    
+    @PutMapping("/update-ve/{id}")
+    public ResponseEntity<Map<String, Object>> capNhatTrangThaiVe(
+            @PathVariable("id") int id,
+            @RequestBody Map<String, Integer> requestBody) {
+
+        Map<String, Object> response = new HashMap<>();
+
+        try {
+            int trangThai = requestBody.get("trangThai");
+
+            PhieuDatVeDao dao = new PhieuDatVeDao();
+            PhieuDatVe phieu = dao.getPhieuDatVeById(id);
+
+            if (phieu == null) {
+                response.put("success", false);
+                response.put("message", "Không tìm thấy phiếu đặt vé!");
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+            }
+
+            boolean updated = dao.updatePhieuDatVe(id, trangThai);
+
+            if (updated) {
+                response.put("success", true);
+                response.put("message", "Cập nhật trạng thái vé thành công!");
+                return ResponseEntity.ok(response);
+            } else {
+                response.put("success", false);
+                response.put("message", "Cập nhật thất bại!");
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+            }
+        } catch (Exception e) {
+            response.put("success", false);
+            response.put("message", "Lỗi khi cập nhật: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
+    }
+    
+    @PostMapping("/xe/them")
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> themXe(@RequestBody Xe xeRequest) {
+        Map<String, Object> response = new HashMap<>();
+
+        if (xeRequest == null || xeRequest.getBienSo() == null || xeRequest.getBienSo().trim().isEmpty() ||
+            xeRequest.getTenXe() == null || xeRequest.getTenXe().trim().isEmpty() ||
+            xeRequest.getLoaiXe() == null || xeRequest.getLoaiXe().getIdLoaiXe() == 0) {
+
+            response.put("success", false);
+            response.put("message", "Thông tin xe không hợp lệ!");
+            return ResponseEntity.badRequest().body(response);
+        }
+
+        try {
+            XeDao xeDao = new XeDao();
+            LoaiXeDao loaiXeDao = new LoaiXeDao();
+
+            xeRequest.setBienSo(xeRequest.getBienSo().trim());
+            xeRequest.setTenXe(xeRequest.getTenXe().trim());
+
+            LoaiXe loaiXe = loaiXeDao.getLoaiXeById(xeRequest.getLoaiXe().getIdLoaiXe());
+            if (loaiXe == null) {
+                response.put("success", false);
+                response.put("message", "Loại xe không tồn tại!");
+                return ResponseEntity.badRequest().body(response);
+            }
+
+            xeRequest.setLoaiXe(loaiXe);
+            xeRequest.setTrangThai(1); 
+
+            Xe xeDaThem = xeDao.themXe(xeRequest);
+            
+            xeDao.themDanhSachViTriGheTheoXe(xeDaThem, loaiXe.getSoGhe());
+
+            response.put("success", true);
+            response.put("message", "Thêm xe thành công!");
+            return ResponseEntity.ok(response);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            response.put("success", false);
+            response.put("message", "Lỗi khi thêm xe: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
+    }
+    
+    @PostMapping("/quanhuyen/them")
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> themQuanHuyen(@RequestBody QuanHuyen quanHuyenRequest) {
+        Map<String, Object> response = new HashMap<>();
+
+        if (quanHuyenRequest == null ||
+            quanHuyenRequest.getTenQuanHuyen() == null || quanHuyenRequest.getTenQuanHuyen().trim().isEmpty() ||
+            quanHuyenRequest.getTinhThanh() == null || quanHuyenRequest.getTinhThanh().getIdTinhThanh() == 0) {
+
+            response.put("success", false);
+            response.put("message", "Thông tin Quận/Huyện không hợp lệ!");
+            return ResponseEntity.badRequest().body(response);
+        }
+
+        try {
+            QuanHuyenDao quanHuyenDao = new QuanHuyenDao();
+            TinhThanhDao tinhThanhDao = new TinhThanhDao();
+
+            quanHuyenRequest.setTenQuanHuyen(quanHuyenRequest.getTenQuanHuyen().trim());
+
+            TinhThanh tinhThanh = tinhThanhDao.getTinhThanhById(quanHuyenRequest.getTinhThanh().getIdTinhThanh());
+            if (tinhThanh == null) {
+                response.put("success", false);
+                response.put("message", "Tỉnh/Thành không tồn tại!");
+                return ResponseEntity.badRequest().body(response);
+            }
+
+            quanHuyenRequest.setTinhThanh(tinhThanh);
+            quanHuyenRequest.setTrangThai(1); 
+
+            quanHuyenDao.themQuanHuyen(quanHuyenRequest);
+
+            response.put("success", true);
+            response.put("message", "Thêm Quận/Huyện thành công!");
+            return ResponseEntity.ok(response);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            response.put("success", false);
+            response.put("message", "Lỗi khi thêm Quận/Huyện: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
+    }
+    
+    @PostMapping("/tinhthanh/them")
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> themTinhThanh(@RequestBody TinhThanh tinhThanhRequest) {
+        Map<String, Object> response = new HashMap<>();
+
+        if (tinhThanhRequest == null || tinhThanhRequest.getTenTinh() == null || tinhThanhRequest.getTenTinh().trim().isEmpty()) {
+            response.put("success", false);
+            response.put("message", "Tên Tỉnh/Thành không được để trống!");
+            return ResponseEntity.badRequest().body(response);
+        }
+
+        try {
+            TinhThanhDao tinhThanhDao = new TinhThanhDao();
+
+            tinhThanhRequest.setTenTinh(tinhThanhRequest.getTenTinh().trim());
+            tinhThanhRequest.setTrangThai(1);
+
+            TinhThanh daThem = tinhThanhDao.themTinhThanh(tinhThanhRequest);
+
+            if (daThem != null) {
+                response.put("success", true);
+                response.put("message", "Thêm Tỉnh/Thành thành công!");
+                return ResponseEntity.ok(response);
+            } else {
+                response.put("success", false);
+                response.put("message", "Thêm Tỉnh/Thành thất bại!");
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            response.put("success", false);
+            response.put("message", "Lỗi khi thêm Tỉnh/Thành: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
+    }
+    
+    @PostMapping("/nguoi-dung/them")
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> themNguoiDung(@RequestBody NguoiDung nguoiDungRequest) {
+        Map<String, Object> response = new HashMap<>();
+
+        if (nguoiDungRequest == null ||
+            nguoiDungRequest.getHoTen() == null || nguoiDungRequest.getHoTen().trim().isEmpty() ||
+            nguoiDungRequest.getNamSinh() <= 1900 ||
+            nguoiDungRequest.getSoDienThoai() == null || nguoiDungRequest.getSoDienThoai().trim().isEmpty() ||
+            nguoiDungRequest.getDiaChi() == null || nguoiDungRequest.getDiaChi().trim().isEmpty()) {
+
+            response.put("success", false);
+            response.put("message", "Thông tin người dùng không hợp lệ!");
+            return ResponseEntity.badRequest().body(response);
+        }
+
+        int currentYear = Year.now().getValue();
+        if (currentYear - nguoiDungRequest.getNamSinh() < 16) {
+            response.put("success", false);
+            response.put("message", "Người dùng phải từ 16 tuổi trở lên!");
+            return ResponseEntity.badRequest().body(response);
+        }
+
+        String sdt = nguoiDungRequest.getSoDienThoai().trim();
+        if (!sdt.matches("^0\\d{9}$")) {
+            response.put("success", false);
+            response.put("message", "Số điện thoại phải bắt đầu bằng 0 và có đúng 10 chữ số!");
+            return ResponseEntity.badRequest().body(response);
+        }
+
+        try {
+            NguoiDungDao nguoiDungDao = new NguoiDungDao();
+
+            nguoiDungRequest.setTrangThai(1);
+            nguoiDungRequest.setIdPhanQuyen(2);
+            nguoiDungRequest.setNgayDangKy(new Date());
+
+            boolean success = nguoiDungDao.themNguoiDung(nguoiDungRequest);
+            if (success) {
+                response.put("success", true);
+                response.put("message", "Thêm người dùng thành công!");
+                return ResponseEntity.ok(response);
+            } else {
+                response.put("success", false);
+                response.put("message", "Không thể thêm người dùng vào cơ sở dữ liệu.");
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            response.put("success", false);
+            response.put("message", "Lỗi khi thêm người dùng: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
+    }
+    
+    @PostMapping("/tuyenxe/them")
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> themTuyenXe(@RequestBody TuyenXe tuyenXeRequest) {
+        Map<String, Object> response = new HashMap<>();
+
+        if (tuyenXeRequest == null ||
+            tuyenXeRequest.getTenTuyen() == null || tuyenXeRequest.getTenTuyen().trim().isEmpty() ||
+            tuyenXeRequest.getTinhThanhDi() == null || tuyenXeRequest.getTinhThanhDi().getIdTinhThanh() == 0 ||
+            tuyenXeRequest.getTinhThanhDen() == null || tuyenXeRequest.getTinhThanhDen().getIdTinhThanh() == 0 ||
+            tuyenXeRequest.getBenXeDi() == null || tuyenXeRequest.getBenXeDi().getIdBenXe() == 0 ||
+            tuyenXeRequest.getBenXeDen() == null || tuyenXeRequest.getBenXeDen().getIdBenXe() == 0) {
+
+            response.put("success", false);
+            response.put("message", "Thông tin Tuyến Xe không hợp lệ!");
+            return ResponseEntity.badRequest().body(response);
+        }
+
+        try {
+            TuyenXeDao tuyenXeDao = new TuyenXeDao();
+            TinhThanhDao tinhThanhDao = new TinhThanhDao();
+            BenXeDao benXeDao = new BenXeDao();
+            float thoiGianDiChuyenTB = tuyenXeRequest.getThoiGianDiChuyenTB();
+
+            tuyenXeRequest.setTenTuyen(tuyenXeRequest.getTenTuyen().trim());
+            tuyenXeRequest.setThoiGianDiChuyenTB(thoiGianDiChuyenTB);
+
+            TinhThanh tinhDi = tinhThanhDao.getTinhThanhById(tuyenXeRequest.getTinhThanhDi().getIdTinhThanh());
+            TinhThanh tinhDen = tinhThanhDao.getTinhThanhById(tuyenXeRequest.getTinhThanhDen().getIdTinhThanh());
+
+            if (tinhDi == null || tinhDen == null) {
+                response.put("success", false);
+                response.put("message", "Tỉnh/Thành đi hoặc đến không tồn tại!");
+                return ResponseEntity.badRequest().body(response);
+            }
+
+            BenXe benDi = benXeDao.getBenXeById(tuyenXeRequest.getBenXeDi().getIdBenXe());
+            BenXe benDen = benXeDao.getBenXeById(tuyenXeRequest.getBenXeDen().getIdBenXe());
+
+            if (benDi == null || benDen == null) {
+                response.put("success", false);
+                response.put("message", "Bến xe đi hoặc đến không tồn tại!");
+                return ResponseEntity.badRequest().body(response);
+            }
+
+            tuyenXeRequest.setTinhThanhDi(tinhDi);
+            tuyenXeRequest.setTinhThanhDen(tinhDen);
+            tuyenXeRequest.setBenXeDi(benDi);
+            tuyenXeRequest.setBenXeDen(benDen);
+            tuyenXeRequest.setTrangThai(1);
+            System.out.println("tuyenXeRequest: " + tuyenXeRequest);
+
+            tuyenXeDao.themTuyenXe(tuyenXeRequest);
+
+            response.put("success", true);
+            response.put("message", "Thêm tuyến xe thành công!");
+            return ResponseEntity.ok(response);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            response.put("success", false);
+            response.put("message", "Lỗi khi thêm tuyến xe: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
+    }
+    
+    @PostMapping("/chuyenxe/them")
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> themChuyenXe(@RequestBody ChuyenXe chuyenXeRequest) {
+        Map<String, Object> response = new HashMap<>();
+
+        if (chuyenXeRequest == null ||
+            chuyenXeRequest.getThoiDiemDi() == null ||
+            chuyenXeRequest.getThoiDiemDen() == null ||
+            chuyenXeRequest.getTuyenXe() == null || chuyenXeRequest.getTuyenXe().getIdTuyenXe() == 0 ||
+            chuyenXeRequest.getTaiXe() == null || chuyenXeRequest.getTaiXe().getIdNguoiDung() == 0 ||
+            chuyenXeRequest.getXe() == null || chuyenXeRequest.getXe().getIdXe() == 0) {
+
+            response.put("success", false);
+            response.put("message", "Thông tin chuyến xe không hợp lệ!");
+            return ResponseEntity.badRequest().body(response);
+        }
+
+        try {
+            TuyenXeDao tuyenXeDao = new TuyenXeDao();
+            NguoiDungDao taiKhoanDao = new NguoiDungDao();
+            XeDao xeDao = new XeDao();
+            ChuyenXeDao chuyenXeDao = new ChuyenXeDao();
+
+            TuyenXe tuyenXe = tuyenXeDao.getTuyenXeById(chuyenXeRequest.getTuyenXe().getIdTuyenXe());
+            NguoiDung taiXe = taiKhoanDao.getNguoiDungById(chuyenXeRequest.getTaiXe().getIdNguoiDung());
+            Xe xe = xeDao.getXeById(chuyenXeRequest.getXe().getIdXe());
+
+            if (tuyenXe == null || taiXe == null || xe == null) {
+                response.put("success", false);
+                response.put("message", "Tuyến xe, tài xế hoặc xe không tồn tại!");
+                return ResponseEntity.badRequest().body(response);
+            }
+
+            chuyenXeRequest.setTuyenXe(tuyenXe);
+            chuyenXeRequest.setTaiXe(taiXe);
+            chuyenXeRequest.setXe(xe);
+            chuyenXeRequest.setTrangThai(1); 
+
+            chuyenXeDao.themChuyenXe(chuyenXeRequest);
+
+            response.put("success", true);
+            response.put("message", "Thêm chuyến xe thành công!");
+            return ResponseEntity.ok(response);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            response.put("success", false);
+            response.put("message", "Lỗi khi thêm chuyến xe: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
     }
 
 }

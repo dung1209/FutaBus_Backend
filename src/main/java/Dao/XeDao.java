@@ -10,6 +10,7 @@ import HibernateUtils.HibernateUtils;
 import java.util.ArrayList;
 
 import FutaBus.bean.ChuyenXe;
+import FutaBus.bean.ViTriGhe;
 import FutaBus.bean.Xe;
 
 @Repository
@@ -203,6 +204,73 @@ public class XeDao {
             if (session != null) {
                 session.close();
             }
+        }
+    }
+    
+    public Xe themXe(Xe xe) {
+        Transaction transaction = null;
+        Session session = null;
+        try {
+            if (factory == null) {
+                factory = HibernateUtils.getSessionFactory();
+            }
+
+            session = factory.openSession();
+            transaction = session.beginTransaction();
+
+            session.save(xe);
+
+            transaction.commit();
+            return xe;
+        } catch (Exception e) {
+            if (transaction != null) {
+                transaction.rollback();
+            }
+            e.printStackTrace();
+            return null;
+        } finally {
+            if (session != null) {
+                session.close();
+            }
+        }
+    }
+    
+    public void themDanhSachViTriGheTheoXe(Xe xe, int soGhe) {
+        Transaction transaction = null;
+        Session session = null;
+
+        try {
+            if (factory == null) {
+                factory = HibernateUtils.getSessionFactory();
+            }
+
+            session = factory.openSession();
+            transaction = session.beginTransaction();
+
+            int gheMoiBen = soGhe / 2;
+
+            for (int i = 1; i <= gheMoiBen; i++) {
+                ViTriGhe vtA = new ViTriGhe();
+                vtA.setTenViTri("A" + i);
+                vtA.setTrangThai(0);
+                vtA.setXe(xe);
+                session.save(vtA);
+
+                ViTriGhe vtB = new ViTriGhe();
+                vtB.setTenViTri("B" + i);
+                vtB.setTrangThai(0);
+                vtB.setXe(xe);
+                session.save(vtB);
+            }
+            
+            session.flush();
+            session.clear(); 
+            transaction.commit();
+        } catch (Exception e) {
+            if (transaction != null) transaction.rollback();
+            e.printStackTrace();
+        } finally {
+            if (session != null) session.close();
         }
     }
     

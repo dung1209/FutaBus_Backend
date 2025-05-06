@@ -279,5 +279,68 @@ public class PhieuDatVeDao {
 	    }
 	    return result;
 	}
+	
+	public PhieuDatVe getPhieuDatVeById(int idPhieuDatVe) {
+	    PhieuDatVe phieuDatVe = null;
+	    Session session = null;
+	    Transaction transaction = null;
+
+	    try {
+	        if (factory == null) {
+	            factory = HibernateUtils.getSessionFactory();
+	        }
+
+	        session = factory.openSession();
+	        transaction = session.beginTransaction();
+
+	        String hql = "FROM PhieuDatVe WHERE idPhieuDatVe = :idPhieuDatVe";
+	        Query<PhieuDatVe> query = session.createQuery(hql, PhieuDatVe.class);
+	        query.setParameter("idPhieuDatVe", idPhieuDatVe);
+
+	        phieuDatVe = query.uniqueResult();
+
+	        transaction.commit();
+	    } catch (Exception e) {
+	        if (transaction != null) transaction.rollback();
+	        e.printStackTrace();
+	    } finally {
+	        if (session != null) session.close();
+	    }
+
+	    return phieuDatVe;
+	}
+	
+	public boolean updatePhieuDatVe(int idPhieuDatVe, int trangThai) {
+	    Session session = null;
+	    Transaction transaction = null;
+
+	    try {
+	        if (factory == null) {
+	            factory = HibernateUtils.getSessionFactory();
+	        }
+	        session = factory.openSession();
+	        transaction = session.beginTransaction();
+
+	        String hql = "UPDATE PhieuDatVe SET trangThai = :trangThai WHERE idPhieuDatVe = :idPhieuDatVe";
+	        Query<?> query = session.createQuery(hql);
+	        query.setParameter("trangThai", trangThai);
+	        query.setParameter("idPhieuDatVe", idPhieuDatVe);
+
+	        int rowsAffected = query.executeUpdate();
+	        transaction.commit();
+
+	        return rowsAffected > 0;
+	    } catch (Exception e) {
+	        if (transaction != null) {
+	            transaction.rollback();
+	        }
+	        e.printStackTrace();
+	        return false;
+	    } finally {
+	        if (session != null) {
+	            session.close();
+	        }
+	    }
+	}
 
 }

@@ -86,7 +86,7 @@ public class TinhThanhDao {
             session = factory.openSession();
             transaction = session.beginTransaction();
 
-            String hql = "from TinhThanh"; 
+            String hql = "from TinhThanh where trangThai != 0"; 
             Query<TinhThanh> query = session.createQuery(hql, TinhThanh.class);
 
             tinhThanhList = query.getResultList(); 
@@ -199,6 +199,35 @@ public class TinhThanhDao {
             }
             e.printStackTrace();
             return false;
+        } finally {
+            if (session != null) {
+                session.close();
+            }
+        }
+    }
+    
+    public TinhThanh themTinhThanh(TinhThanh tinhThanh) {
+        Transaction transaction = null;
+        Session session = null;
+
+        try {
+            if (factory == null) {
+                factory = HibernateUtils.getSessionFactory();
+            }
+
+            session = factory.openSession();
+            transaction = session.beginTransaction();
+
+            session.save(tinhThanh);
+
+            transaction.commit();
+            return tinhThanh;
+        } catch (Exception e) {
+            if (transaction != null) {
+                transaction.rollback();
+            }
+            e.printStackTrace();
+            return null;
         } finally {
             if (session != null) {
                 session.close();

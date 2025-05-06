@@ -100,4 +100,33 @@ public class LoaiXeDao {
         }
         return loaiXeList;
     }
+    
+    public LoaiXe getLoaiXeById(int idLoaiXe) {
+        LoaiXe loaiXe = null;
+        Session session = null;
+        Transaction transaction = null;
+
+        try {
+            if (factory == null) {
+                factory = HibernateUtils.getSessionFactory();
+            }
+
+            session = factory.openSession();
+            transaction = session.beginTransaction();
+
+            String hql = "FROM LoaiXe WHERE idLoaiXe = :idLoaiXe";
+            Query<LoaiXe> query = session.createQuery(hql, LoaiXe.class);
+            query.setParameter("idLoaiXe", idLoaiXe);
+
+            loaiXe = query.uniqueResult();
+
+            transaction.commit();
+        } catch (Exception e) {
+            if (transaction != null) transaction.rollback();
+            e.printStackTrace();
+        } finally {
+            if (session != null) session.close();
+        }
+        return loaiXe;
+    }
 }

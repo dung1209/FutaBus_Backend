@@ -270,5 +270,33 @@ public class ChuyenXeDao {
         }
     }
     
+    public ChuyenXe themChuyenXe(ChuyenXe chuyenXe) {
+        Transaction transaction = null;
+        Session session = null;
+        try {
+            if (factory == null) {
+                factory = HibernateUtils.getSessionFactory();
+            }
+
+            session = factory.openSession();
+            transaction = session.beginTransaction();
+
+            session.save(chuyenXe);
+
+            transaction.commit();
+            return chuyenXe;
+        } catch (Exception e) {
+            if (transaction != null) {
+                transaction.rollback();
+            }
+            e.printStackTrace();
+            return null;
+        } finally {
+            if (session != null) {
+                session.close();
+            }
+        }
+    }
+    
 }
 

@@ -208,5 +208,33 @@ public class TuyenXeDao {
         }
         return tuyenXeList;
     }
+    
+    public TuyenXe themTuyenXe(TuyenXe tuyenXe) {
+        Transaction transaction = null;
+        Session session = null;
+        try {
+            if (factory == null) {
+                factory = HibernateUtils.getSessionFactory();
+            }
+
+            session = factory.openSession();
+            transaction = session.beginTransaction();
+
+            session.save(tuyenXe);
+
+            transaction.commit();
+            return tuyenXe;
+        } catch (Exception e) {
+            if (transaction != null) {
+                transaction.rollback();
+            }
+            e.printStackTrace();
+            return null;
+        } finally {
+            if (session != null) {
+                session.close();
+            }
+        }
+    }
 
 }
