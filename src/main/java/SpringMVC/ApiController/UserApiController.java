@@ -30,6 +30,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -302,6 +303,50 @@ public class UserApiController {
 
 			PhieuDatVeDao phieuDatVeReturnDao = new PhieuDatVeDao();
 			phieuDatVeDao.saveBooking(back, nguoiDung.getIdNguoiDung());
+		}
+
+		Map<String, Object> response = new HashMap<>();
+		response.put("status", "success");
+		response.put("message", "Đặt vé thành công!");
+
+		return ResponseEntity.ok(response);
+	}
+	
+	@PostMapping("/confirmBooking1")
+    public ResponseEntity<Map<String, Object>> confirmBooking(
+        @RequestBody BookingWrapper wrapper,
+        @RequestHeader("userid") int userid) {
+		
+		
+		if (userid == -1) {
+	        Map<String, Object> response = new HashMap<>();
+	        response.put("status", "error");
+	        response.put("message", "Bạn cần phải đăng nhập trước khi đặt vé!");
+	        return ResponseEntity.status(401).body(response);
+	    }
+
+		BookingRequest go = wrapper.getBookingData();
+		BookingRequest back = wrapper.getBookingDataReturn();
+
+		LocalDateTime now = LocalDateTime.now();
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+		String formattedDateTime = now.format(formatter);
+
+		String idViTriGheStr = go.getIdViTriGhe();
+
+		List<Integer> gheList = Arrays.stream(idViTriGheStr.split(",")).map(Integer::parseInt)
+				.collect(Collectors.toList());
+
+		PhieuDatVeDao phieuDatVeDao = new PhieuDatVeDao();
+		phieuDatVeDao.saveBooking(go, userid);
+
+		if (back != null && back.getIdViTriGhe() != null && !back.getIdViTriGhe().isEmpty()) {
+			String idViTriGheReturnStr = back.getIdViTriGhe();
+			List<Integer> gheReturnList = Arrays.stream(idViTriGheReturnStr.split(",")).map(Integer::parseInt)
+					.collect(Collectors.toList());
+
+			PhieuDatVeDao phieuDatVeReturnDao = new PhieuDatVeDao();
+			phieuDatVeDao.saveBooking(back, userid);
 		}
 
 		Map<String, Object> response = new HashMap<>();

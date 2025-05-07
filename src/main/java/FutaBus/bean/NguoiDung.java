@@ -1,6 +1,9 @@
 package FutaBus.bean;
 
 import javax.persistence.*;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
+
 import java.util.Date;
 
 @Entity
@@ -38,6 +41,7 @@ public class NguoiDung {
 
     @Column(name = "ngayDangKy", nullable = true)
     @Temporal(TemporalType.TIMESTAMP)
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yyyy HH:mm:ss", timezone = "Asia/Ho_Chi_Minh")
     private Date ngayDangKy;
 
     @Column(name = "trangThai", nullable = false)
