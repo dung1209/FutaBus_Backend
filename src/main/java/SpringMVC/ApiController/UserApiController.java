@@ -447,6 +447,40 @@ public class UserApiController {
             return ResponseEntity.status(500).body(response);
         }
     }
+	
+	@PostMapping("/send-verify-otp")
+	@ResponseBody
+	public ResponseEntity<Map<String, Object>> sendVerifyOtp(@RequestBody OtpRequest otpRequest, HttpSession session) {
+	    String email = otpRequest.getEmail();
+	    Map<String, Object> response = new HashMap<>();
+
+	    if (email == null || email.trim().isEmpty()) {
+	        response.put("success", false);
+	        response.put("message", "Email không được để trống");
+	        return ResponseEntity.badRequest().body(response);
+	    }
+
+	    String otp = generateOTP();
+	    try {
+	        boolean emailSent = sendEmailWithOTP(email, otp);
+	        if (emailSent) {
+	            session.setAttribute("otp", otp);
+	            session.setAttribute("email", email);
+	            response.put("success", true);
+	            response.put("message", "OTP đã được gửi đến email");
+	            System.out.println("OTP đã gửi: " + otp + " | Email: " + email + " | Session: " + session.getId());
+	            return ResponseEntity.ok(response);
+	        } else {
+	            response.put("success", false);
+	            response.put("message", "Không thể gửi email OTP");
+	            return ResponseEntity.badRequest().body(response);
+	        }
+	    } catch (Exception e) {
+	        response.put("success", false);
+	        response.put("message", "Lỗi khi gửi OTP: " + e.getMessage());
+	        return ResponseEntity.status(500).body(response);
+	    }
+	}
 
 	@PostMapping("/verify-otp")
 	@ResponseBody
@@ -669,6 +703,43 @@ public class UserApiController {
             response.put("success", false);
             response.put("message", "Lỗi khi lấy dữ liệu: " + e.getMessage());
             return ResponseEntity.internalServerError().body(response);
+        }
+    }
+    
+    @PostMapping("/reset-password")
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> resetPassword(@RequestBody CreateAccountRequest request) {
+        String email = request.getEmail();
+        String newPassword = request.getPassword();
+
+        Map<String, Object> response = new HashMap<>();
+
+        if (email == null || newPassword == null || email.trim().isEmpty() || newPassword.trim().isEmpty()) {
+            response.put("success", false);
+            response.put("message", "Thông tin không được để trống!");
+            return ResponseEntity.badRequest().body(response);
+        }
+
+        try {
+            NguoiDungDao nguoiDungDao = new NguoiDungDao();
+            NguoiDung nguoiDung = nguoiDungDao.findNguoiDungByEmail(email);
+
+            if (nguoiDung == null) {
+                response.put("success", false);
+                response.put("message", "Email không tồn tại trong hệ thống!");
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+            }
+
+            nguoiDung.setMatKhau(newPassword);
+            nguoiDungDao.updateMatKhau(nguoiDung);
+
+            response.put("success", true);
+            response.put("message", "Cập nhật mật khẩu thành công!");
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            response.put("success", false);
+            response.put("message", "Đã có lỗi khi cập nhật mật khẩu: " + e.getMessage());
+            return ResponseEntity.status(500).body(response);
         }
     }
 

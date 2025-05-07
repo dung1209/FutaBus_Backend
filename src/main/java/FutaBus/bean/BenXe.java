@@ -22,18 +22,23 @@ public class BenXe {
     @Column(name = "soDienThoai", nullable = false, length = 10)
     private String soDienThoai;
 
-    @Column(name = "idQuanHuyen", nullable = false)
-    private int idQuanHuyen;
+    @ManyToOne
+    @JoinColumn(name = "idQuanHuyen", referencedColumnName = "idQuanHuyen")
+    private QuanHuyen quanHuyen;
+    
+    @Column(name = "trangThai", nullable = false)
+    private int trangThai;
 
     public BenXe() {
     }
     
-    public BenXe(int idBenXe, String tenBenXe, String diaChi, String soDienThoai, int idQuanHuyen) {
+    public BenXe(int idBenXe, String tenBenXe, String diaChi, String soDienThoai, QuanHuyen quanHuyen, int thangThai) {
     	this.idBenXe = idBenXe;
     	this.tenBenXe = tenBenXe;
     	this.diaChi = diaChi;
     	this.soDienThoai = soDienThoai;
-    	this.idQuanHuyen = idQuanHuyen;
+    	this.quanHuyen = quanHuyen;
+    	this.trangThai = thangThai;
     }
 
     public int getIdBenXe() {
@@ -68,12 +73,20 @@ public class BenXe {
 		this.soDienThoai = soDienThoai;
 	}
 
-	public int getIdQuanHuyen() {
-		return idQuanHuyen;
+	public QuanHuyen getQuanHuyen() {
+		return quanHuyen;
 	}
 
-	public void setIdQuanHuyen(int idQuanHuyen) {
-		this.idQuanHuyen = idQuanHuyen;
+	public void setQuanHuyen(QuanHuyen quanHuyen) {
+		this.quanHuyen = quanHuyen;
+	}
+
+	public int getTrangThai() {
+		return trangThai;
+	}
+
+	public void setTrangThai(int trangThai) {
+		this.trangThai = trangThai;
 	}
 
 	@Override
@@ -83,7 +96,8 @@ public class BenXe {
                 ", tenBenXe='" + tenBenXe + '\'' +
                 ", diaChi=" + diaChi +
                 ", soDienThoai=" + soDienThoai +
-                ", idQuanHuyen='" + idQuanHuyen + '\'' +
+                ", trangThai=" + trangThai +
+                ", quanHuyen=" + (quanHuyen != null ? quanHuyen.getTenQuanHuyen() : "N/A") +
                 '}';
     }
 }

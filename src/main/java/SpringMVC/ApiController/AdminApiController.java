@@ -1006,5 +1006,140 @@ public class AdminApiController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
     }
+    
+    @GetMapping("/benxe")
+    public Map<String, Object> getBenXe(
+            @RequestParam(value = "page", defaultValue = "1") int page) {
+
+        ChuyenXeDao chuyenXeDao = new ChuyenXeDao();
+        XeDao xeDao = new XeDao();
+        NguoiDungDao nguoiDungDao = new NguoiDungDao();
+        PhieuDatVeDao phieuDatVeDao = new PhieuDatVeDao();
+        BenXeDao benXeDao = new BenXeDao();
+        QuanHuyenDao quanHuyenDao = new QuanHuyenDao();
+
+        int offset = (page - 1) * PAGE_SIZE;
+        List<BenXe> benXeList = benXeDao.getBenXeByPage(offset, PAGE_SIZE);
+        
+        long totalBenXe = benXeDao.getTotalBenXe();
+        int totalPages = (int) Math.ceil((double) totalBenXe / PAGE_SIZE);
+        
+        List<QuanHuyen> quanHuyenList = quanHuyenDao.getAllQuanHuyen();
+        
+        long totalCustomer = nguoiDungDao.getTotalNguoiDung(1);
+        long totalXe = xeDao.getTotalXe();
+        long totalChuyenXe = chuyenXeDao.getTotalChuyenXe();
+        BigDecimal tongDoanhThuThangHienTai = phieuDatVeDao.getTongDoanhThuThangHienTai();
+
+        return Map.of(
+        	"benXeList", benXeList,
+        	"quanHuyenList", quanHuyenList,
+        	"currentPage", page,
+        	"totalPages", totalPages,
+            "totalCustomer", totalCustomer,
+            "totalXe", totalXe,
+            "totalChuyenXe", totalChuyenXe,
+            "tongDoanhThuThangHienTai", tongDoanhThuThangHienTai
+        );
+    }
+    
+    @PostMapping("/update-benxe")
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> updateBenXe(@RequestBody BenXe benXeRequest) {
+        Map<String, Object> response = new HashMap<>();
+        
+        System.out.println("Dữ liệu bến xe nhận được: " + benXeRequest);
+
+        if (benXeRequest == null || benXeRequest.getIdBenXe() == 0 || benXeRequest.getTenBenXe() == null ||
+            benXeRequest.getDiaChi() == null || benXeRequest.getDiaChi().trim().isEmpty() || benXeRequest.getSoDienThoai() == null || benXeRequest.getSoDienThoai().trim().isEmpty()) {
+            response.put("success", false);
+            response.put("message", "Thông tin bến xe không hợp lệ!");
+            return ResponseEntity.badRequest().body(response);
+        }
+
+        try {
+            BenXeDao benXeDao = new BenXeDao();
+            BenXe existingBenXe = benXeDao.getBenXeById(benXeRequest.getIdBenXe());
+
+            if (existingBenXe == null) {
+                response.put("success", false);
+                response.put("message", "Bến xe không tồn tại!");
+                return ResponseEntity.badRequest().body(response);
+            }
+
+            existingBenXe.setTenBenXe(benXeRequest.getTenBenXe().trim());
+            existingBenXe.setDiaChi(benXeRequest.getDiaChi().trim());
+            existingBenXe.setSoDienThoai(benXeRequest.getSoDienThoai().trim());
+            existingBenXe.setQuanHuyen(benXeRequest.getQuanHuyen());
+
+            benXeDao.updateBenXe(existingBenXe);
+
+            response.put("success", true);
+            response.put("message", "Cập nhật bến xe thành công!");
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            e.printStackTrace();
+            response.put("success", false);
+            response.put("message", "Lỗi khi cập nhật: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
+    }
+    
+    @PutMapping("/benxe/xoa/{id}")
+    public ResponseEntity<String> xoaBenXe(@PathVariable("id") int id) {
+        BenXeDao benXeDao = new BenXeDao();
+        boolean thanhCong = benXeDao.xoaBenXe(id);
+
+        if (thanhCong) {
+            return ResponseEntity.ok("Xoá bến xe (mềm) thành công");
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Không tìm thấy bến xe hoặc lỗi trong quá trình xoá");
+        }
+    }
+    
+    @PostMapping("/benxe/them")
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> themBenXe(@RequestBody BenXe benXeRequest) {
+        Map<String, Object> response = new HashMap<>();
+
+        if (benXeRequest == null ||
+            benXeRequest.getTenBenXe() == null || benXeRequest.getTenBenXe().trim().isEmpty() ||
+            benXeRequest.getDiaChi() == null || benXeRequest.getDiaChi().trim().isEmpty() ||
+            benXeRequest.getSoDienThoai() == null || benXeRequest.getSoDienThoai().trim().isEmpty() ||
+            benXeRequest.getQuanHuyen() == null || benXeRequest.getQuanHuyen().getIdQuanHuyen() == 0) {
+
+            response.put("success", false);
+            response.put("message", "Thông tin bến xe không hợp lệ!");
+            return ResponseEntity.badRequest().body(response);
+        }
+
+        try {
+            QuanHuyenDao quanHuyenDao = new QuanHuyenDao();
+            BenXeDao benXeDao = new BenXeDao();
+
+            QuanHuyen quanHuyen = quanHuyenDao.getQuanHuyenById(benXeRequest.getQuanHuyen().getIdQuanHuyen());
+
+            if (quanHuyen == null) {
+                response.put("success", false);
+                response.put("message", "Quận/Huyện không tồn tại!");
+                return ResponseEntity.badRequest().body(response);
+            }
+
+            benXeRequest.setQuanHuyen(quanHuyen);
+            benXeRequest.setTrangThai(1);
+
+            benXeDao.themBenXe(benXeRequest);
+
+            response.put("success", true);
+            response.put("message", "Thêm bến xe thành công!");
+            return ResponseEntity.ok(response);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            response.put("success", false);
+            response.put("message", "Lỗi khi thêm bến xe: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
+    }
 
 }
