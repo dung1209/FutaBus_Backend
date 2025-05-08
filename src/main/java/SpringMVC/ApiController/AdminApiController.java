@@ -12,6 +12,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
+import java.util.stream.Collectors;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -34,6 +35,7 @@ import Dao.PhieuDatVeDao;
 import Dao.QuanHuyenDao;
 import Dao.TinhThanhDao;
 import Dao.TuyenXeDao;
+import Dao.ViTriGheDao;
 import Dao.XeDao;
 import FutaBus.bean.BenXe;
 import FutaBus.bean.BookingInfo;
@@ -689,6 +691,57 @@ public class AdminApiController {
             }
 
             boolean updated = dao.updatePhieuDatVe(id, trangThai);
+
+            if (updated) {
+                response.put("success", true);
+                response.put("message", "Cập nhật trạng thái vé thành công!");
+                return ResponseEntity.ok(response);
+            } else {
+                response.put("success", false);
+                response.put("message", "Cập nhật thất bại!");
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+            }
+        } catch (Exception e) {
+            response.put("success", false);
+            response.put("message", "Lỗi khi cập nhật: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
+    }
+    
+    @PutMapping("/cancel-ve/{id}")
+    public ResponseEntity<Map<String, Object>> huyVe(
+            @PathVariable("id") int id,
+            @RequestBody Map<String, Object> requestBody) {
+
+        Map<String, Object> response = new HashMap<>();
+
+        try {
+        	int trangThai = (int) requestBody.get("trangThai");
+            List<Integer> idGheList = ((List<?>) requestBody.get("idGheList"))
+            	    .stream()
+            	    .map(obj -> Integer.parseInt(obj.toString()))
+            	    .collect(Collectors.toList());
+            
+            ViTriGheDao viTriGheDao = new ViTriGheDao();
+            PhieuDatVeDao dao = new PhieuDatVeDao();
+            PhieuDatVe phieu = dao.getPhieuDatVeById(id);
+
+            if (phieu == null) {
+                response.put("success", false);
+                response.put("message", "Không tìm thấy phiếu đặt vé!");
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+            }
+
+            boolean updated = dao.updatePhieuDatVe(id, trangThai);
+            
+            for (Integer idGhe : idGheList) {
+            	try {
+                    viTriGheDao.updateTrangThai(idGhe, 0);
+                } catch (Exception e) {
+                    System.out.println("Không thể cập nhật id ghế: " + idGhe);
+                    e.printStackTrace();
+                }
+            }
 
             if (updated) {
                 response.put("success", true);

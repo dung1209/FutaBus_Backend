@@ -81,52 +81,71 @@ public class PhieuDatVeDao {
 	public int save(Session session, PhieuDatVe phieu) {
 		return (int) session.save(phieu);
 	}
-
+	
 	public List<PurchaseHistory> getLichSuMuaVeByIdNguoiDung(int idNguoiDung) {
-		List<Object[]> result = new ArrayList<>();
-		List<PurchaseHistory> purchaseHistoryList = new ArrayList<>();
-		Session session = null;
+	    List<PurchaseHistory> purchaseHistoryList = new ArrayList<>();
+	    Session session = null;
 
-		try {
-			session = HibernateUtils.getSessionFactory().openSession();
+	    try {
+	        session = HibernateUtils.getSessionFactory().openSession();
 
-			String hql = "SELECT pdv, cx, tx " + "FROM PhieuDatVe pdv "
-					+ "JOIN ChuyenXe cx ON pdv.idChuyenXe = cx.idChuyenXe "
-					+ "JOIN TuyenXe tx ON cx.tuyenXe.idTuyenXe = tx.idTuyenXe "
-					+ "WHERE pdv.idNguoiDung = :idNguoiDung";
+	        String sql = "SELECT pdv.idPhieuDatVe, tx.tenTuyen, cx.thoiDiemDi, pdv.soLuongVe, pdv.tongTien, pdv.trangThai, " +
+	                     "STRING_AGG(CAST(vtg.idViTriGhe AS VARCHAR), ', ') AS danhSachIDGhe " +
+	                     "FROM PhieuDatVe pdv " +
+	                     "JOIN ChuyenXe cx ON pdv.idChuyenXe = cx.idChuyenXe " +
+	                     "JOIN TuyenXe tx ON cx.idTuyenXe = tx.idTuyenXe " +
+	                     "JOIN VeXe vx ON vx.idPhieuDatVe = pdv.idPhieuDatVe " +
+	                     "JOIN ViTriGhe vtg ON vx.idViTriGhe = vtg.idViTriGhe " +
+	                     "WHERE pdv.idNguoiDung = :idNguoiDung " +
+	                     "GROUP BY pdv.idPhieuDatVe, tx.tenTuyen, cx.thoiDiemDi, pdv.soLuongVe, pdv.tongTien, pdv.trangThai";
 
-			Query<Object[]> query = session.createQuery(hql);
-			query.setParameter("idNguoiDung", idNguoiDung);
-			result = query.getResultList();
+	        Query<Object[]> query = session.createSQLQuery(sql);
+	        query.setParameter("idNguoiDung", idNguoiDung);
+	        List<Object[]> result = query.getResultList();
 
-			for (Object[] record : result) {
-				PhieuDatVe pdv = (PhieuDatVe) record[0];
-				ChuyenXe cx = (ChuyenXe) record[1];
-				TuyenXe tx = (TuyenXe) record[2];
+	        for (Object[] record : result) {
+	            int idPhieuDatVe = (Integer) record[0];
+	            String tenTuyen = (String) record[1];
+	            Date thoiDiemDi = (Timestamp) record[2];
+	            int soLuongVe = (Integer) record[3];
+	            BigDecimal tongTien = (BigDecimal) record[4];
+	            int trangThai = ((Number) record[5]).intValue();
+	            String danhSachIDGhe = (String) record[6];
 
-				PurchaseHistory purchaseHistory = new PurchaseHistory(pdv.getIdPhieuDatVe(), tx.getTenTuyen(), cx.getThoiDiemDi(), pdv.getSoLuongVe(), pdv.getTongTien(), pdv.getTrangThai());
-				purchaseHistoryList.add(purchaseHistory);
-			}
-			
-			for (PurchaseHistory purchaseHistory : purchaseHistoryList) {
-			    System.out.println("---------------------------------------------");
-			    System.out.println("ID Phieu Dat Ve: " + purchaseHistory.getIdPhieuDatVe());
-			    System.out.println("Ten Tuyen: " + purchaseHistory.getTenTuyen());
-			    System.out.println("Thoi Diu Di: " + purchaseHistory.getThoiDiemDi());
-			    System.out.println("So Luong Ve: " + purchaseHistory.getSoLuongVe());
-			    System.out.println("Tong Tien: " + purchaseHistory.getTongTien());
-			    System.out.println("Trang Thai: " + purchaseHistory.getTrangThai());
-			    System.out.println("---------------------------------------------");
-			}
+	            PurchaseHistory purchaseHistory = new PurchaseHistory(
+	                idPhieuDatVe,
+	                tenTuyen,
+	                thoiDiemDi,
+	                soLuongVe,
+	                tongTien,
+	                trangThai,
+	                danhSachIDGhe
+	            );
 
-		} catch (Exception e) {
-			e.printStackTrace();
-		} finally {
-			if (session != null)
-				session.close();
-		}
+	            purchaseHistoryList.add(purchaseHistory);
+	        }
 
-		return purchaseHistoryList;
+	        for (PurchaseHistory purchaseHistory : purchaseHistoryList) {
+	            System.out.println("---------------------------------------------");
+	            System.out.println("ID Phieu Dat Ve: " + purchaseHistory.getIdPhieuDatVe());
+	            System.out.println("Ten Tuyen: " + purchaseHistory.getTenTuyen());
+	            System.out.println("Thoi Diu Di: " + purchaseHistory.getThoiDiemDi());
+	            System.out.println("So Luong Ve: " + purchaseHistory.getSoLuongVe());
+	            System.out.println("Tong Tien: " + purchaseHistory.getTongTien());
+	            System.out.println("Trang Thai: " + purchaseHistory.getTrangThai());
+	            System.out.println("danhSachIDGhe: " + purchaseHistory.getDanhSachIDGhe());
+	            System.out.println("---------------------------------------------");
+	        }
+
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	    } finally {
+	        if (session != null) {
+	            session.close();
+	        }
+	    }
+
+	    return purchaseHistoryList;
 	}
 	
 	public BigDecimal getTongDoanhThuThangHienTai() {
