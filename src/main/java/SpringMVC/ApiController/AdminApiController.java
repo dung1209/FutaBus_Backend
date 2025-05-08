@@ -14,6 +14,8 @@ import java.util.Map;
 import java.util.TimeZone;
 import java.util.stream.Collectors;
 
+import javax.mail.Session;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -1193,30 +1195,5 @@ public class AdminApiController {
             response.put("message", "Lỗi khi thêm bến xe: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
-    }
-    public List<ChuyenXe> getAllChuyenXe() {
-        List<ChuyenXe> chuyenXeList = new ArrayList<>();
-        Session session = null;
-
-        try {
-            if (factory == null) {
-                factory = HibernateUtils.getSessionFactory();
-            }
-
-            session = factory.openSession();
-
-            String hql = "FROM ChuyenXe WHERE trangThai != 0";
-            Query<ChuyenXe> query = session.createQuery(hql, ChuyenXe.class);
-            chuyenXeList = query.getResultList();
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            if (session != null) {
-                session.close();
-            }
-        }
-
-        return chuyenXeList;
     }
 }
