@@ -1141,29 +1141,12 @@ public class AdminApiController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
     }
-    public List<ChuyenXe> getAllChuyenXe() {
-        List<ChuyenXe> chuyenXeList = new ArrayList<>();
-        Session session = null;
-
-        try {
-            if (factory == null) {
-                factory = HibernateUtils.getSessionFactory();
-            }
-
-            session = factory.openSession();
-
-            String hql = "FROM ChuyenXe WHERE trangThai != 0";
-            Query<ChuyenXe> query = session.createQuery(hql, ChuyenXe.class);
-            chuyenXeList = query.getResultList();
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            if (session != null) {
-                session.close();
-            }
-        }
-
-        return chuyenXeList;
+    @GetMapping("/getListTuyenXe")
+    public List<TuyenXe> getDanhSachTuyenXe(){
+        return new TuyenXeDao().getAllTuyenXe();
+    }
+    @GetMapping("/getListChuyenXe")
+    public List<ChuyenXe> getDanhSachChuyenXe(){
+        return new ChuyenXeDao().getAllChuyenXe();
     }
 }
