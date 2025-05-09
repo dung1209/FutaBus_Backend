@@ -12,11 +12,12 @@ public class PurchaseHistory {
     private int soLuongVe;
     private BigDecimal tongTien;
     private int trangThai;
+    private String danhSachIDGhe;
     
     public PurchaseHistory() {}
 
 	public PurchaseHistory(int idPhieuDatVe, String tenTuyen, Date date, int soLuongVe, BigDecimal tongTien,
-			int trangThai) {
+			int trangThai, String danhSachIDGhe) {
 		super();
 		this.idPhieuDatVe = idPhieuDatVe;
 		this.tenTuyen = tenTuyen;
@@ -24,6 +25,7 @@ public class PurchaseHistory {
 		this.soLuongVe = soLuongVe;
 		this.tongTien = tongTien;
 		this.trangThai = trangThai;
+		this.danhSachIDGhe = danhSachIDGhe;
 	}
 
 	public int getIdPhieuDatVe() {
@@ -74,10 +76,18 @@ public class PurchaseHistory {
 		this.trangThai = trangThai;
 	}
 
+	public String getDanhSachIDGhe() {
+		return danhSachIDGhe;
+	}
+
+	public void setDanhSachIDGhe(String danhSachIDGhe) {
+		this.danhSachIDGhe = danhSachIDGhe;
+	}
+
 	@Override
 	public String toString() {
 		return "PurchaseHistory [idPhieuDatVe=" + idPhieuDatVe + ", tenTuyen=" + tenTuyen + ", thoiDiemDi=" + thoiDiemDi
-				+ ", soLuongVe=" + soLuongVe + ", tongTien=" + tongTien + ", trangThai=" + trangThai + "]";
+				+ ", soLuongVe=" + soLuongVe + ", tongTien=" + tongTien + ", trangThai=" + trangThai + ", danhSachIDGhe=" + danhSachIDGhe +"]";
 	}
 	
 }

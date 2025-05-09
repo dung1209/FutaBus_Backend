@@ -692,6 +692,7 @@ public class UserApiController {
                 data.put("soLuongVe", record.getSoLuongVe());
                 data.put("tongTien", record.getTongTien());
                 data.put("trangThai", record.getTrangThai());
+                data.put("danhSachIDGhe", record.getDanhSachIDGhe());
                 result.add(data);
             }
 
