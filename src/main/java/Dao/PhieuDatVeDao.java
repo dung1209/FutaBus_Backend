@@ -361,5 +361,73 @@ public class PhieuDatVeDao {
 	        }
 	    }
 	}
+	
+	public List<BookingInfo> getAllPhieuDatVe() {
+	    List<BookingInfo> list = new ArrayList<>();
+	    Session session = null;
+
+	    try {
+	        session = HibernateUtils.getSessionFactory().openSession();
+
+	        String sql = "SELECT " +
+	                "pdv.idPhieuDatVe, nd.hoTen, nd.soDienThoai, nd.email, " +
+	                "cx.thoiDiemDi, cx.thoiDiemDen, cx.giaVe, pdv.soLuongVe, " +
+	                "pdv.tongTien, pdv.trangThai, pdv.thoiGianDatVe, " +
+	                "tx.tenTuyen, bxDi.tenBenXe AS benDi, bxDen.tenBenXe AS benDen, " +
+	                "x.bienSo AS bienSoXe, lx.tenLoai AS loaiXe, " +
+	                "STRING_AGG(vtg.tenViTri, ', ') AS danhSachGhe, " +
+	                "STRING_AGG(CAST(vtg.idViTriGhe AS VARCHAR), ', ') AS danhSachIDGhe " +
+	                "FROM PhieuDatVe pdv " +
+	                "JOIN NguoiDung nd ON pdv.idNguoiDung = nd.idNguoiDung " +
+	                "JOIN ChuyenXe cx ON pdv.idChuyenXe = cx.idChuyenXe " +
+	                "JOIN TuyenXe tx ON cx.idTuyenXe = tx.idTuyenXe " +
+	                "JOIN BenXe bxDi ON tx.idBenXeDi = bxDi.idBenXe " +
+	                "JOIN BenXe bxDen ON tx.idBenXeDen = bxDen.idBenXe " +
+	                "JOIN Xe x ON cx.idXe = x.idXe " +
+	                "JOIN LoaiXe lx ON x.idLoaiXe = lx.idLoaiXe " +
+	                "JOIN VeXe vx ON vx.idPhieuDatVe = pdv.idPhieuDatVe " +
+	                "JOIN ViTriGhe vtg ON vx.idViTriGhe = vtg.idViTriGhe " +
+	                "GROUP BY pdv.idPhieuDatVe, nd.hoTen, nd.soDienThoai, nd.email, " +
+	                "cx.thoiDiemDi, cx.thoiDiemDen, cx.giaVe, pdv.soLuongVe, pdv.tongTien, " +
+	                "pdv.trangThai, pdv.thoiGianDatVe, tx.tenTuyen, bxDi.tenBenXe, bxDen.tenBenXe, " +
+	                "x.bienSo, lx.tenLoai " +
+	                "ORDER BY pdv.thoiGianDatVe DESC";
+
+	        @SuppressWarnings("unchecked")
+	        List<Object[]> rows = session.createNativeQuery(sql).getResultList();
+
+	        for (Object[] row : rows) {
+	            BookingInfo info = new BookingInfo();
+
+	            info.setIdPhieuDatVe((int) row[0]);
+	            info.setHoTen((String) row[1]);
+	            info.setSoDienThoai((String) row[2]);
+	            info.setEmail((String) row[3]);
+	            info.setThoiDiemDi(row[4].toString());
+	            info.setThoiDiemDen(row[5].toString());
+	            info.setGiaVe(((Number) row[6]).doubleValue());
+	            info.setSoLuongVe((int) row[7]);
+	            info.setTongTien(((Number) row[8]).doubleValue());
+	            info.setTrangThai(row[9].toString());
+	            info.setThoiGianDatVe(row[10].toString());
+	            info.setTenTuyen((String) row[11]);
+	            info.setBenDi((String) row[12]);
+	            info.setBenDen((String) row[13]);
+	            info.setBienSoXe((String) row[14]);
+	            info.setLoaiXe((String) row[15]);
+	            info.setDanhSachGhe((String) row[16]);
+	            info.setDanhSachIDGhe((String) row[17]);
+
+	            list.add(info);
+	        }
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	    } finally {
+	        if (session != null)
+	            session.close();
+	    }
+
+	    return list;
+	}
 
 }

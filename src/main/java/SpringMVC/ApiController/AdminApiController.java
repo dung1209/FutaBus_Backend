@@ -1196,4 +1196,32 @@ public class AdminApiController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
     }
+    
+    @GetMapping("/nguoidung/all")
+    public List<NguoiDung> getAllNguoiDung() {
+        NguoiDungDao nguoiDungDao = new NguoiDungDao();
+        return nguoiDungDao.getAllNguoiDung();
+    }
+    
+    @GetMapping("/tuyenxe/all")
+    public List<TuyenXe> getAllTuyenXe() {
+        TuyenXeDao tuyenXeDao = new TuyenXeDao();
+        return tuyenXeDao.getAllTuyenXe();
+    }
+    
+    @GetMapping("/phieudatve/all")
+    public List<BookingInfo> getAllPhieuDatVe() {
+        PhieuDatVeDao phieuDatVeDao = new PhieuDatVeDao();
+        return phieuDatVeDao.getAllPhieuDatVe();
+    }
+    
+    @GetMapping("/getListTuyenXe")
+    public List<TuyenXe> getDanhSachTuyenXe(){
+        return new TuyenXeDao().getAllTuyenXe();
+    }
+    @GetMapping("/getListChuyenXe")
+    public List<ChuyenXe> getDanhSachChuyenXe(){
+        return new ChuyenXeDao().getAllChuyenXe();
+    }
+
 }
