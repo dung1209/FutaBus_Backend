@@ -40,6 +40,7 @@ import Dao.TuyenXeDao;
 import Dao.ViTriGheDao;
 import Dao.XeDao;
 import FutaBus.bean.BenXe;
+import FutaBus.bean.BenXeDTO;
 import FutaBus.bean.BookingInfo;
 import FutaBus.bean.ChuyenXe;
 import FutaBus.bean.ChuyenXeUpdateDTO;
@@ -1213,6 +1214,30 @@ public class AdminApiController {
     public List<BookingInfo> getAllPhieuDatVe() {
         PhieuDatVeDao phieuDatVeDao = new PhieuDatVeDao();
         return phieuDatVeDao.getAllPhieuDatVe();
+    }
+    
+    @GetMapping("/benxe/all")
+    public List<BenXe> getAllBenXe() {
+        BenXeDao benXeDao = new BenXeDao();
+        return benXeDao.getAllBenXe();
+    }
+    
+    @GetMapping("/benxedto/all")
+    public List<BenXeDTO> getAllBenXeDTO() {
+        BenXeDao benXeDao = new BenXeDao();
+        return benXeDao.getAllBenXeDTO();
+    }
+    
+    @GetMapping("/tinhthanh/all")
+    public List<TinhThanh> getAllTinhThanh() {
+        TinhThanhDao tinhThanhDao = new TinhThanhDao();
+        return tinhThanhDao.getAllTinhThanh();
+    }
+    
+    @GetMapping("/quanhuyen/all")
+    public List<QuanHuyen> getAllQuanHuyen() {
+    	QuanHuyenDao quanHuyenDao = new QuanHuyenDao();
+        return quanHuyenDao.getAllQuanHuyen();
     }
     
     @GetMapping("/getListTuyenXe")
