@@ -11,11 +11,9 @@
 			com.microsoft.sqlserver.jdbc.SQLServerDriver
 		</property>
 
-		<property name="hibernate.connection.url">
-			jdbc:sqlserver://DESKTOP-BMS5ORI;databaseName=futabus_booking_db
-		</property>
+		<property name="hibernate.connection.url">jdbc:sqlserver://192.168.79.1;databaseName=futabus_booking_db</property>
 		<property name="hibernate.connection.username">sa</property>
-        <property name="hibernate.connection.password">123456</property>
+        <property name="hibernate.connection.password">P@ssw0rd</property>
 
 		<property name="connection.pool_size">100</property>
 		<property name="hibernate.dialect">

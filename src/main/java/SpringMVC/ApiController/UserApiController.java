@@ -48,6 +48,7 @@ import Dao.PhieuDatVeDao;
 import Dao.QuanHuyenDao;
 import Dao.TinhThanhDao;
 import Dao.TuyenXeDao;
+import Dao.VeXeDao;
 import Dao.ViTriGheDao;
 import Dao.XeDao;
 import FutaBus.bean.BenXe;
@@ -60,6 +61,7 @@ import FutaBus.bean.NguoiDung;
 import FutaBus.bean.OtpRequest;
 import FutaBus.bean.PhieuDatVe;
 import FutaBus.bean.PurchaseHistory;
+import FutaBus.bean.PurchaseItemResponse;
 import FutaBus.bean.QuanHuyen;
 import FutaBus.bean.TinhThanh;
 import FutaBus.bean.TuyenXe;
@@ -196,6 +198,77 @@ public class UserApiController {
 		return ResponseEntity.ok(response);
 	}
 
+	@GetMapping("/book-tickets1")
+	@ResponseBody
+	public ResponseEntity<Map<String, Object>> bookTicketsPage1(@RequestParam String departureId,
+			@RequestParam String departure, @RequestParam String destinationId, @RequestParam String destination,
+			@RequestParam String start, @RequestParam String end, @RequestParam String departureDate,
+			@RequestParam(required = false) String returnDate, @RequestParam String idTrip,
+			@RequestParam String startTime, @RequestParam String endTime, @RequestParam String loai,
+			@RequestParam String price, @RequestParam String soGhe, @RequestParam String idXe,
+			@RequestParam(required = false) String idTripReturn, @RequestParam(required = false) String startTimeReturn,
+			@RequestParam(required = false) String endTimeReturn, @RequestParam(required = false) String priceReturn,
+			@RequestParam(required = false) String soGheReturn, @RequestParam(required = false) String idXeReturn) {
+
+		ViTriGheDao viTriGheDao = new ViTriGheDao();
+		XeDao xedao = new XeDao();
+		
+		int idXeInt = parseIntSafe(idXe);
+		Xe Xego = xedao.getXeById(idXeInt);
+
+		String biensoxeGo = Xego.getBienSo();
+		List<ViTriGhe> viTriGheTangDuoiGo = viTriGheDao.getViTriGheTangDuoiByIdXe(idXeInt);
+		List<ViTriGhe> viTriGheTangTrenGo = viTriGheDao.getViTriGheTangTrenByIdXe(idXeInt);
+
+		String biensoxeReturn = null;
+		List<ViTriGhe> viTriGheTangDuoiReturn = new ArrayList<>();
+		List<ViTriGhe> viTriGheTangTrenReturn = new ArrayList<>();
+
+		if (returnDate != null && !returnDate.trim().isEmpty() && idXeReturn != null) {
+			int idXeReturnInt = parseIntSafe(idXeReturn);
+		    Xe xeReturn = xedao.getXeById(idXeReturnInt);
+			biensoxeReturn = xeReturn.getBienSo();
+			viTriGheTangDuoiReturn = viTriGheDao.getViTriGheTangDuoiByIdXe(idXeReturnInt);
+			viTriGheTangTrenReturn = viTriGheDao.getViTriGheTangTrenByIdXe(idXeReturnInt);
+		}
+
+		Map<String, Object> response = new HashMap<>();
+		response.put("status", "success");
+
+		response.put("departureId", departureId);
+		response.put("departure", departure);
+		response.put("destinationId", destinationId);
+		response.put("destination", destination);
+		response.put("departureDate", departureDate);
+		response.put("start", start);
+		response.put("end", end);
+		response.put("idTrip", idTrip);
+		response.put("startTime", startTime);
+		response.put("endTime", endTime);
+		response.put("loai", loai);
+		response.put("price", price);
+		response.put("soGhe", soGhe);
+		response.put("idXe", idXe);
+		response.put("biensoxeGo", biensoxeGo);
+		response.put("viTriGheTangDuoiList", viTriGheTangDuoiGo);
+		response.put("viTriGheTangTrenList", viTriGheTangTrenGo);
+
+		if (returnDate != null && !returnDate.trim().isEmpty()) {
+			response.put("returnDate", returnDate);
+			response.put("idTripReturn", idTripReturn);
+			response.put("startTimeReturn", startTimeReturn);
+			response.put("endTimeReturn", endTimeReturn);
+			response.put("priceReturn", priceReturn);
+			response.put("soGheReturn", soGheReturn);
+			response.put("idXeReturn", idXeReturn);
+		    response.put("biensoxeReturn", biensoxeReturn);
+			response.put("viTriGheTangDuoiReturnList", viTriGheTangDuoiReturn);
+			response.put("viTriGheTangTrenReturnList", viTriGheTangTrenReturn);
+		}
+
+		return ResponseEntity.ok(response);
+	}
+	
 	private int parseIntSafe(String s) {
 		try {
 			return Integer.parseInt(s);
@@ -698,6 +771,26 @@ public class UserApiController {
 
             response.put("success", true);
             response.put("data", result);
+            return ResponseEntity.ok(response);
+
+        } catch (Exception e) {
+            response.put("success", false);
+            response.put("message", "Lỗi khi lấy dữ liệu: " + e.getMessage());
+            return ResponseEntity.internalServerError().body(response);
+        }
+    }
+    
+    @GetMapping("/purchase-history-items/{idPhieuDatVe}")
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> getLichSuMuaVeitems(@PathVariable int idPhieuDatVe) {
+        Map<String, Object> response = new HashMap<>();
+
+        try {
+            VeXeDao dao = new VeXeDao();
+            PurchaseItemResponse ItemVe = dao.getLichSuMuaVeByIdPhieuDatVe(idPhieuDatVe);
+            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            response.put("success", true);
+            response.put("data", ItemVe);
             return ResponseEntity.ok(response);
 
         } catch (Exception e) {

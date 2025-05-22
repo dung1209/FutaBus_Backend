@@ -1196,7 +1196,6 @@ public class AdminApiController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
     }
-<<<<<<< HEAD
     @GetMapping("/getListTuyenXe")
     public List<TuyenXe> getDanhSachTuyenXe(){
         return new TuyenXeDao().getAllTuyenXe();
@@ -1205,6 +1204,4 @@ public class AdminApiController {
     public List<ChuyenXe> getDanhSachChuyenXe(){
         return new ChuyenXeDao().getAllChuyenXe();
     }
-=======
->>>>>>> c23fd14a8f483a620a30999dab53ccab3efe7a95
 }
