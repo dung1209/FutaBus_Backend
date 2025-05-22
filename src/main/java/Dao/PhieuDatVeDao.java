@@ -202,7 +202,7 @@ public class PhieuDatVeDao {
 	        session = HibernateUtils.getSessionFactory().openSession();
 
 	        String sql = "SELECT " +
-	                "pdv.idPhieuDatVe, nd.hoTen, nd.soDienThoai, nd.email, " +
+	                "pdv.idPhieuDatVe, pdv.hoTen, pdv.soDienThoai, pdv.email, " +
 	                "cx.thoiDiemDi, cx.thoiDiemDen, cx.giaVe, pdv.soLuongVe, " +
 	                "pdv.tongTien, pdv.trangThai, pdv.thoiGianDatVe, " +
 	                "tx.tenTuyen, bxDi.tenBenXe AS benDi, bxDen.tenBenXe AS benDen, " +
@@ -219,7 +219,7 @@ public class PhieuDatVeDao {
 	                "JOIN LoaiXe lx ON x.idLoaiXe = lx.idLoaiXe " +
 	                "JOIN VeXe vx ON vx.idPhieuDatVe = pdv.idPhieuDatVe " +
 	                "JOIN ViTriGhe vtg ON vx.idViTriGhe = vtg.idViTriGhe " +
-	                "GROUP BY pdv.idPhieuDatVe, nd.hoTen, nd.soDienThoai, nd.email, " +
+	                "GROUP BY pdv.idPhieuDatVe, pdv.hoTen, pdv.soDienThoai, pdv.email, " +
 	                "cx.thoiDiemDi, cx.thoiDiemDen, cx.giaVe, pdv.soLuongVe, pdv.tongTien, " +
 	                "pdv.trangThai, pdv.thoiGianDatVe, tx.tenTuyen, bxDi.tenBenXe, bxDen.tenBenXe, " +
 	                "x.bienSo, lx.tenLoai " +
@@ -370,7 +370,7 @@ public class PhieuDatVeDao {
 	        session = HibernateUtils.getSessionFactory().openSession();
 
 	        String sql = "SELECT " +
-	                "pdv.idPhieuDatVe, nd.hoTen, nd.soDienThoai, nd.email, " +
+	                "pdv.idPhieuDatVe, pdv.hoTen, pdv.soDienThoai, pdv.email, " +
 	                "cx.thoiDiemDi, cx.thoiDiemDen, cx.giaVe, pdv.soLuongVe, " +
 	                "pdv.tongTien, pdv.trangThai, pdv.thoiGianDatVe, " +
 	                "tx.tenTuyen, bxDi.tenBenXe AS benDi, bxDen.tenBenXe AS benDen, " +
@@ -387,7 +387,7 @@ public class PhieuDatVeDao {
 	                "JOIN LoaiXe lx ON x.idLoaiXe = lx.idLoaiXe " +
 	                "JOIN VeXe vx ON vx.idPhieuDatVe = pdv.idPhieuDatVe " +
 	                "JOIN ViTriGhe vtg ON vx.idViTriGhe = vtg.idViTriGhe " +
-	                "GROUP BY pdv.idPhieuDatVe, nd.hoTen, nd.soDienThoai, nd.email, " +
+	                "GROUP BY pdv.idPhieuDatVe, pdv.hoTen, pdv.soDienThoai, pdv.email, " +
 	                "cx.thoiDiemDi, cx.thoiDiemDen, cx.giaVe, pdv.soLuongVe, pdv.tongTien, " +
 	                "pdv.trangThai, pdv.thoiGianDatVe, tx.tenTuyen, bxDi.tenBenXe, bxDen.tenBenXe, " +
 	                "x.bienSo, lx.tenLoai " +
