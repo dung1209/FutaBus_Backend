@@ -297,6 +297,7 @@ public class ChuyenXeDao {
             }
         }
     }
+
     public List<ChuyenXe> getAllChuyenXe() {
         List<ChuyenXe> chuyenXeList = new ArrayList<>();
         Session session = null;

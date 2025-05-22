@@ -9,6 +9,7 @@ import org.hibernate.query.Query;
 import HibernateUtils.HibernateUtils;
 import java.util.ArrayList;
 import FutaBus.bean.BenXe;
+import FutaBus.bean.BenXeDTO;
 
 @Repository
 public class BenXeDao {
@@ -230,6 +231,52 @@ public class BenXeDao {
                 session.close();
             }
         }
+    }
+    
+    public List<BenXeDTO> getAllBenXeDTO() {
+        List<BenXeDTO> benXeDTOList = new ArrayList<>();
+        Session session = null;
+        Transaction transaction = null;
+
+        try {
+            if (factory == null) {
+                factory = HibernateUtils.getSessionFactory();
+            }
+            session = factory.openSession();
+            transaction = session.beginTransaction();
+
+            String hql = "FROM BenXe WHERE trangThai != 0";
+            Query<BenXe> query = session.createQuery(hql, BenXe.class);
+            List<BenXe> benXeList = query.getResultList();
+
+            for (BenXe benXe : benXeList) {
+                int idQuanHuyen = benXe.getQuanHuyen() != null ? benXe.getQuanHuyen().getIdQuanHuyen() : 0;
+
+                BenXeDTO dto = new BenXeDTO(
+                    benXe.getIdBenXe(),
+                    benXe.getTenBenXe(),
+                    benXe.getDiaChi(),
+                    benXe.getSoDienThoai(),
+                    idQuanHuyen,
+                    benXe.getTrangThai()
+                );
+
+                benXeDTOList.add(dto);
+            }
+
+            transaction.commit();
+        } catch (Exception e) {
+            if (transaction != null) {
+                transaction.rollback();
+            }
+            e.printStackTrace();
+        } finally {
+            if (session != null) {
+                session.close();
+            }
+        }
+
+        return benXeDTOList;
     }
 
 }
