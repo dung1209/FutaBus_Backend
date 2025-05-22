@@ -1239,7 +1239,6 @@ public class AdminApiController {
     	QuanHuyenDao quanHuyenDao = new QuanHuyenDao();
         return quanHuyenDao.getAllQuanHuyen();
     }
-    
     @GetMapping("/getListTuyenXe")
     public List<TuyenXe> getDanhSachTuyenXe(){
         return new TuyenXeDao().getAllTuyenXe();
@@ -1248,5 +1247,4 @@ public class AdminApiController {
     public List<ChuyenXe> getDanhSachChuyenXe(){
         return new ChuyenXeDao().getAllChuyenXe();
     }
-
 }
