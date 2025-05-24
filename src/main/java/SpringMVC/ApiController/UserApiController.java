@@ -2,12 +2,14 @@ package SpringMVC.ApiController;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Random;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -17,6 +19,7 @@ import java.time.format.DateTimeFormatter;
 
 import javax.servlet.http.HttpSession;
 
+import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -39,7 +42,14 @@ import org.springframework.web.bind.annotation.RestController;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
+import com.google.api.client.googleapis.auth.oauth2.GooglePublicKeysManager;
+import com.google.api.client.http.javanet.NetHttpTransport;
+import com.google.api.client.json.jackson2.JacksonFactory;
+import org.springframework.http.HttpHeaders;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.*;
 import Dao.BenXeDao;
 import Dao.ChuyenXeDao;
 import Dao.LoaiXeDao;
@@ -73,11 +83,23 @@ import FutaBus.bean.LoginRequest;
 
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import javax.annotation.PostConstruct;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 
 @CrossOrigin(origins = "http://localhost:8086", allowCredentials = "true")
 @RestController
 @RequestMapping("/api/user")
 public class UserApiController {
+	
+	private String clientId = "909666408197-a3l5csqs07f4dj6sjoteueg7efedr48e.apps.googleusercontent.com";
+	private String clientSecret = "demo_secret";
 
 	@Autowired
     private JavaMailSender mailSender;
@@ -831,9 +853,100 @@ public class UserApiController {
             response.put("message", "Cập nhật mật khẩu thành công!");
             return ResponseEntity.ok(response);
         } catch (Exception e) {
-            response.put("success", false);
+            //response.put("success", false);
             response.put("message", "Đã có lỗi khi cập nhật mật khẩu: " + e.getMessage());
             return ResponseEntity.status(500).body(response);
+        }
+    }
+
+    @PostConstruct
+    public void init() {
+        System.out.println("Google Client ID: " + clientId);
+    }
+
+    @GetMapping("/login-google")
+    public ResponseEntity<?> loginWithGoogle(@RequestParam("code") String code) throws Exception {
+        HttpClient client = HttpClient.newHttpClient();
+        HttpRequest tokenRequest = HttpRequest.newBuilder()
+                .uri(URI.create("https://oauth2.googleapis.com/token"))
+                .header("Content-Type", "application/x-www-form-urlencoded")
+                .POST(HttpRequest.BodyPublishers.ofString(
+                        "code=" + code +
+                        "&client_id=" + clientId +
+                        "&client_secret=" + clientSecret +
+                        "&redirect_uri=http://localhost:8085/FutaBus_Backend/api/user/login-google" +
+                        "&grant_type=authorization_code"
+                ))
+                .build();
+
+        HttpResponse<String> tokenResponse = client.send(tokenRequest, HttpResponse.BodyHandlers.ofString());
+        String body = tokenResponse.body();
+        System.out.println("Token response: " + body);
+
+        JSONObject tokenJson = new JSONObject(body);
+        if (tokenJson.has("error")) {
+            String error = tokenJson.getString("error");
+            String errorDesc = tokenJson.optString("error_description", "");
+            throw new RuntimeException("Failed to get token: " + error + " - " + errorDesc);
+        }
+
+        String accessToken = tokenJson.getString("access_token");
+
+        HttpRequest infoRequest = HttpRequest.newBuilder()
+                .uri(URI.create("https://www.googleapis.com/oauth2/v2/userinfo"))
+                .header("Authorization", "Bearer " + accessToken)
+                .build();
+
+        HttpResponse<String> infoResponse = client.send(infoRequest, HttpResponse.BodyHandlers.ofString());
+        JSONObject userInfo = new JSONObject(infoResponse.body());
+        
+        String email = userInfo.getString("email");
+        String fullName = userInfo.getString("name");
+        
+        System.out.print("Email google: " + email);
+        
+        NguoiDungDao nguoiDungDao = new NguoiDungDao();
+
+        if (!nguoiDungDao.checkEmailExists(email)) {
+            NguoiDung nguoiDung = new NguoiDung();
+            nguoiDung.setHoTen(fullName);
+            nguoiDung.setEmail(email);
+
+            String randomPassword = UUID.randomUUID().toString();
+            nguoiDung.setMatKhau(randomPassword);
+
+            nguoiDung.setNgayDangKy(new Date());
+            nguoiDung.setTrangThai((byte) 1);
+            nguoiDung.setIdPhanQuyen(1);
+
+            nguoiDungDao.save(nguoiDung);
+            System.out.print("Lưu người dùng: " + nguoiDung);
+        }
+        
+        NguoiDung nguoiDungFromDb = nguoiDungDao.findNguoiDungByEmail(email);
+
+        if (nguoiDungFromDb == null) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("status", "fail", "message", "Không tìm thấy người dùng trong DB."));
+        }
+
+        String redirectUrl = "http://localhost:8086/FutaBus_Frontend/login/callback?email=" + URLEncoder.encode(email, "UTF-8");
+
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setLocation(URI.create(redirectUrl));
+
+        return new ResponseEntity<>(headers, HttpStatus.FOUND);
+
+    }
+    
+    @GetMapping("/get-by-email")
+    public ResponseEntity<?> getNguoiDungByEmail(@RequestParam("email") String email) {
+        NguoiDung nguoiDung = new NguoiDungDao().findNguoiDungByEmail(email);
+        if (nguoiDung != null) {
+            return ResponseEntity.ok(Map.of("status", "success", "nguoiDung", nguoiDung));
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("status", "fail", "message", "Không tìm thấy người dùng"));
         }
     }
 
