@@ -949,5 +949,103 @@ public class UserApiController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("status", "fail", "message", "Không tìm thấy người dùng"));
         }
     }
+    
+    @PostMapping("/login-google-mobile")
+    public ResponseEntity<?> loginWithGoogleMobile(@RequestBody Map<String, String> payload) {
+        String email = payload.get("email");
+        String fullName = payload.get("name");
+        
+        System.out.println("Đăng nhập bằng gg android: "+ email);
+
+        if (email == null || fullName == null) {
+            return ResponseEntity.badRequest().body(Map.of(
+                "status", "fail",
+                "message", "Thiếu email hoặc họ tên."
+            ));
+        }
+
+        NguoiDungDao nguoiDungDao = new NguoiDungDao();
+
+        if (!nguoiDungDao.checkEmailExists(email)) {
+            NguoiDung nguoiDung = new NguoiDung();
+            nguoiDung.setEmail(email);
+            nguoiDung.setHoTen(fullName);
+
+            String randomPassword = UUID.randomUUID().toString();
+            nguoiDung.setMatKhau(randomPassword);
+            nguoiDung.setNgayDangKy(new Date());
+            nguoiDung.setTrangThai((byte) 1);
+            nguoiDung.setIdPhanQuyen(1);
+
+            nguoiDungDao.save(nguoiDung);
+            System.out.println("Đã tạo người dùng mới: " + email);
+        }
+
+        NguoiDung nguoiDung = nguoiDungDao.findNguoiDungByEmail(email);
+
+        if (nguoiDung == null) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of(
+                "status", "fail",
+                "message", "Không tìm thấy người dùng sau khi tạo."
+            ));
+        }
+
+        Map<String, Object> userInfo = Map.of(
+            "idNguoiDung", nguoiDung.getIdNguoiDung(),
+            "email", nguoiDung.getEmail(),
+            "hoTen", nguoiDung.getHoTen(),
+            "idPhanQuyen", nguoiDung.getIdPhanQuyen()
+        );
+
+        return ResponseEntity.ok(Map.of(
+            "status", "success",
+            "message", "Đăng nhập Google thành công",
+            "nguoiDung", userInfo
+        ));
+    }
+    
+    @PostMapping("/login-google-android")
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> loginGoogleAndroid(@RequestBody LoginRequest request, HttpSession session) {
+    	String email = request.getEmail();
+        System.out.println("Nhận yêu cầu đăng nhập Google với email: " + email);
+
+        Map<String, Object> response = new HashMap<>();
+        NguoiDungDao nguoiDungDao = new NguoiDungDao();
+        NguoiDung nguoiDung = null;
+
+        try {
+            nguoiDung = nguoiDungDao.findNguoiDungByEmail(email);
+
+            if (nguoiDung != null) {
+                System.out.println("User tồn tại, đăng nhập thành công!");
+                session.setAttribute("currentUser", nguoiDung);
+
+                if (nguoiDung.getHoTen() == null || nguoiDung.getHoTen().isEmpty()) {
+                    nguoiDung.setHoTen("bạn");
+                }
+
+                response.put("status", "success");
+                response.put("message", "Đăng nhập thành công bằng Google!");
+                response.put("nguoiDung", Map.of(
+                    "idNguoiDung", nguoiDung.getIdNguoiDung(),
+                    "idPhanQuyen", nguoiDung.getIdPhanQuyen(),
+                    "hoTen", nguoiDung.getHoTen(),
+                    "email", nguoiDung.getEmail()
+                ));
+            } else {
+                System.out.println("User chưa tồn tại trong hệ thống!");
+                response.put("status", "error");
+                response.put("message", "Email chưa được đăng ký trong hệ thống.");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            response.put("status", "error");
+            response.put("message", "Lỗi server: " + e.getMessage());
+            return ResponseEntity.status(500).body(response);
+        }
+
+        return ResponseEntity.ok(response);
+    }
 
 }
