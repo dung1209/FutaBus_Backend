@@ -285,7 +285,7 @@ public class AdminApiController {
         boolean thanhCong = nguoiDungDao.xoaNguoiDung(id);
 
         if (thanhCong) {
-            return ResponseEntity.ok("Xoá người dùng (mềm) thành công");
+            return ResponseEntity.ok("Xoá người dùng thành công");
         } else {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Không tìm thấy người dùng hoặc lỗi trong quá trình xoá");
         }
@@ -354,7 +354,7 @@ public class AdminApiController {
         boolean thanhCong = tuyenXeDao.xoaTuyenXe(id);
 
         if (thanhCong) {
-            return ResponseEntity.ok("Xoá tuyến xe (mềm) thành công");
+            return ResponseEntity.ok("Xoá tuyến xe thành công");
         } else {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Không tìm thấy tuyến xe hoặc lỗi trong quá trình xoá");
         }
@@ -1239,7 +1239,6 @@ public class AdminApiController {
     	QuanHuyenDao quanHuyenDao = new QuanHuyenDao();
         return quanHuyenDao.getAllQuanHuyen();
     }
-    
     @GetMapping("/getListTuyenXe")
     public List<TuyenXe> getDanhSachTuyenXe(){
         return new TuyenXeDao().getAllTuyenXe();
@@ -1248,6 +1247,7 @@ public class AdminApiController {
     public List<ChuyenXe> getDanhSachChuyenXe(){
         return new ChuyenXeDao().getAllChuyenXe();
     }
+
     
     @GetMapping("/xe/all")
     public List<Xe> getAllXe() {   
@@ -1448,4 +1448,5 @@ public class AdminApiController {
     public List<LoaiXe> getAllLoaiXe() {   
         return new LoaiXeDao().getAllLoaiXe();
     }
+
 }

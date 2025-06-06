@@ -109,6 +109,7 @@ public class NguoiDungDao {
 
         return nguoiDung;
     }
+    
     public boolean checkEmailExists(String email) {
         Session session = null;
         Transaction transaction = null;

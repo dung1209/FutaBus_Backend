@@ -297,7 +297,7 @@ public class ChuyenXeDao {
             }
         }
     }
-    
+
     public List<ChuyenXe> getAllChuyenXe() {
         List<ChuyenXe> chuyenXeList = new ArrayList<>();
         Session session = null;
@@ -325,6 +325,7 @@ public class ChuyenXeDao {
 
         return chuyenXeList;
     }
+
     public boolean isTaiXeTrungGioChay(int idTaiXe, Date thoiDiemDi, Date thoiDiemDen, int idChuyenXe) {
         Session session = null;
         boolean isConflict = false;
@@ -395,5 +396,6 @@ public class ChuyenXeDao {
     }
     
     
+
 }
 
