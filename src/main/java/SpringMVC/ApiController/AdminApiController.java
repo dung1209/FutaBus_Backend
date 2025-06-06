@@ -1248,5 +1248,204 @@ public class AdminApiController {
     public List<ChuyenXe> getDanhSachChuyenXe(){
         return new ChuyenXeDao().getAllChuyenXe();
     }
+    
+    @GetMapping("/xe/all")
+    public List<Xe> getAllXe() {   
+        return new XeDao().getAllXe();
+    }
+    @GetMapping("/nguoidung/tx")
+    public List<NguoiDung> getAllTaiXe() {
+        NguoiDungDao nguoiDungDao = new NguoiDungDao();
+        return nguoiDungDao.getAllTaiXe();
+    }
+    
+   
 
+    @PutMapping("/chuyenxe/update/{id}")
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> updateChuyen(
+            @PathVariable("id") int idChuyenXe,
+            @RequestBody ChuyenXe chuyenXeRequest
+    ) {
+        Map<String, Object> response = new HashMap<>();
+
+        // Kiểm tra dữ liệu nhập
+        if (chuyenXeRequest == null ||
+            chuyenXeRequest.getXe() == null ||
+            chuyenXeRequest.getThoiDiemDi() == null || chuyenXeRequest.getThoiDiemDen() == null ||
+            chuyenXeRequest.getTuyenXe() == null || chuyenXeRequest.getTaiXe() == null ||
+            chuyenXeRequest.getGiaVe() <= 0) {
+
+            response.put("success", false);
+            response.put("message", "Thông tin chuyến xe không hợp lệ!");
+            return ResponseEntity.badRequest().body(response);
+        }
+
+        try {
+            ChuyenXeDao chuyenXeDao = new ChuyenXeDao();
+            ChuyenXe existingChuyenXe = chuyenXeDao.getChuyenXeById(idChuyenXe);
+
+            if (existingChuyenXe == null) {
+                response.put("success", false);
+                response.put("message", "Chuyến xe không tồn tại!");
+                return ResponseEntity.badRequest().body(response);
+            }
+
+            //  kiểm tra tài xế có trùng giờ chạy với chuyến khác
+            int taiXeId = chuyenXeRequest.getTaiXe().getIdNguoiDung();  
+            int idXe = chuyenXeRequest.getXe().getIdXe();
+            Date newStart = chuyenXeRequest.getThoiDiemDi();
+            Date newEnd = chuyenXeRequest.getThoiDiemDen();
+
+            boolean isTaiXeTrungGio = chuyenXeDao.isTaiXeTrungGioChay(taiXeId, newStart, newEnd, idChuyenXe) ;
+            boolean isXeTrungGio = chuyenXeDao.isXeTrungGioChay(idXe, newStart, newEnd, idChuyenXe);
+            if (isTaiXeTrungGio || isXeTrungGio ) {
+                response.put("success", false);
+                response.put("message", "Tài xế hoặc xe đã có chuyến khác chạy trong khoảng thời gian này!");
+                return ResponseEntity.badRequest().body(response);
+            }
+
+            // Cập nhật dữ liệu
+            existingChuyenXe.setThoiDiemDi(newStart);
+            existingChuyenXe.setThoiDiemDen(newEnd);
+            existingChuyenXe.setGiaVe(chuyenXeRequest.getGiaVe());
+            existingChuyenXe.setTrangThai(chuyenXeRequest.getTrangThai());
+            existingChuyenXe.setTuyenXe(chuyenXeRequest.getTuyenXe());
+            existingChuyenXe.setXe(chuyenXeRequest.getXe());
+            existingChuyenXe.setTaiXe(chuyenXeRequest.getTaiXe());
+
+            chuyenXeDao.updateChuyenXe(existingChuyenXe);
+
+            response.put("success", true);
+            response.put("message", "Cập nhật chuyến xe thành công!");
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            e.printStackTrace();
+            response.put("success", false);
+            response.put("message", "Lỗi khi cập nhật: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
+    }
+    @PostMapping("/chuyen/them")
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> themChuyen(@RequestBody ChuyenXe chuyenXeRequest) {
+        Map<String, Object> response = new HashMap<>();
+
+        if (chuyenXeRequest == null ||
+            chuyenXeRequest.getThoiDiemDi() == null ||
+            chuyenXeRequest.getThoiDiemDen() == null ||
+            chuyenXeRequest.getTuyenXe() == null || chuyenXeRequest.getTuyenXe().getIdTuyenXe() == 0 ||
+            chuyenXeRequest.getTaiXe() == null || chuyenXeRequest.getTaiXe().getIdNguoiDung() == 0 ||
+            chuyenXeRequest.getXe() == null || chuyenXeRequest.getXe().getIdXe() == 0) {
+
+            response.put("success", false);
+            response.put("message", "Thông tin chuyến xe không hợp lệ!");
+            return ResponseEntity.badRequest().body(response);
+        }
+
+        try {
+            TuyenXeDao tuyenXeDao = new TuyenXeDao();
+            NguoiDungDao taiKhoanDao = new NguoiDungDao();
+            XeDao xeDao = new XeDao();
+            ChuyenXeDao chuyenXeDao = new ChuyenXeDao();
+
+            TuyenXe tuyenXe = tuyenXeDao.getTuyenXeById(chuyenXeRequest.getTuyenXe().getIdTuyenXe());
+            NguoiDung taiXe = taiKhoanDao.getNguoiDungById(chuyenXeRequest.getTaiXe().getIdNguoiDung());
+            Xe xe = xeDao.getXeById(chuyenXeRequest.getXe().getIdXe());
+
+            if (tuyenXe == null || taiXe == null || xe == null) {
+                response.put("success", false);
+                response.put("message", "Tuyến xe, tài xế hoặc xe không tồn tại!");
+                return ResponseEntity.badRequest().body(response);
+            }
+            // kiểm tra tài xế có trùng giờ chạy với chuyến khác
+            int taiXeId = chuyenXeRequest.getTaiXe().getIdNguoiDung();  
+            int idXe = chuyenXeRequest.getXe().getIdXe();
+            Date newStart = chuyenXeRequest.getThoiDiemDi();
+            Date newEnd = chuyenXeRequest.getThoiDiemDen();
+
+            boolean isTaiXeTrungGio = chuyenXeDao.isTaiXeTrungGioChay(taiXeId, newStart, newEnd, chuyenXeRequest.getIdChuyenXe()) ;
+            boolean isXeTrungGio = chuyenXeDao.isXeTrungGioChay(idXe, newStart, newEnd, chuyenXeRequest.getIdChuyenXe());
+            if (isTaiXeTrungGio || isXeTrungGio ) {
+                response.put("success", false);
+                response.put("message", "Tài xế hoặc xe đã có chuyến khác chạy trong khoảng thời gian này!");
+                return ResponseEntity.badRequest().body(response);
+            }
+            chuyenXeRequest.setTuyenXe(tuyenXe);
+            chuyenXeRequest.setTaiXe(taiXe);
+            chuyenXeRequest.setXe(xe);
+            chuyenXeRequest.setTrangThai(1); 
+
+            chuyenXeDao.themChuyenXe(chuyenXeRequest);
+
+            response.put("success", true);
+            response.put("message", "Thêm chuyến xe thành công!");
+            return ResponseEntity.ok(response);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            response.put("success", false);
+            response.put("message", "Lỗi khi thêm chuyến xe: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
+    }
+    @PutMapping("/benxe/update/{id}")
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> updateBenXe(
+            @PathVariable("id") int idBenXe,
+            @RequestBody BenXe benxeRequest
+    ) {
+        Map<String, Object> response = new HashMap<>();
+
+        // Kiểm tra dữ liệu nhập
+        if (benxeRequest == null ||
+        	benxeRequest.getTenBenXe() == null || benxeRequest.getDiaChi() == null || benxeRequest.getSoDienThoai() == null ||
+        	benxeRequest.getQuanHuyen() == null 	) {
+
+            response.put("success", false);
+            response.put("message", "Thông tin bến xe không hợp lệ!");
+            return ResponseEntity.badRequest().body(response);
+        }
+
+        try {
+            BenXeDao benXeDao = new BenXeDao();
+            BenXe existingBenXe = benXeDao.getBenXeById(idBenXe);
+
+            if (existingBenXe == null) {
+                response.put("success", false);
+                response.put("message", "Bến xe không tồn tại!");
+                return ResponseEntity.badRequest().body(response);
+            }
+
+            
+            existingBenXe.setTenBenXe(benxeRequest.getTenBenXe());
+            existingBenXe.setDiaChi(benxeRequest.getDiaChi());
+            existingBenXe.setSoDienThoai(benxeRequest.getSoDienThoai());
+            existingBenXe.setQuanHuyen(benxeRequest.getQuanHuyen());
+            existingBenXe.setTrangThai(benxeRequest.getTrangThai());
+            
+
+            benXeDao.updateBenXe(existingBenXe);
+
+            response.put("success", true);
+            response.put("message", "Cập nhật Bến xe thành công!");
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            e.printStackTrace();
+            response.put("success", false);
+            response.put("message", "Lỗi khi cập nhật: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
+    }
+    
+    @GetMapping("/quanhuyenbytinh")
+    public ResponseEntity<List<QuanHuyen>> getQuanHuyenByTinh(@RequestParam("idTinhThanh") int idTinhThanh) {
+        List<QuanHuyen> danhSach = new QuanHuyenDao().getAllQuanHuyenByTinh(idTinhThanh);
+        return ResponseEntity.ok(danhSach);
+    }
+    
+    @GetMapping("/loaixe/all")
+    public List<LoaiXe> getAllLoaiXe() {   
+        return new LoaiXeDao().getAllLoaiXe();
+    }
 }

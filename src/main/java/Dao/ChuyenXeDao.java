@@ -301,19 +301,21 @@ public class ChuyenXeDao {
     public List<ChuyenXe> getAllChuyenXe() {
         List<ChuyenXe> chuyenXeList = new ArrayList<>();
         Session session = null;
-
+        Transaction transaction = null;
         try {
             if (factory == null) {
                 factory = HibernateUtils.getSessionFactory();
             }
 
             session = factory.openSession();
-
-            String hql = "FROM ChuyenXe WHERE trangThai != 0";
+            transaction = session.beginTransaction();
+            String hql = "FROM ChuyenXe where  trangThai != 0";
             Query<ChuyenXe> query = session.createQuery(hql, ChuyenXe.class);
             chuyenXeList = query.getResultList();
+            transaction.commit();
 
         } catch (Exception e) {
+        	if (transaction != null) transaction.rollback();
             e.printStackTrace();
         } finally {
             if (session != null) {
@@ -323,6 +325,75 @@ public class ChuyenXeDao {
 
         return chuyenXeList;
     }
+    public boolean isTaiXeTrungGioChay(int idTaiXe, Date thoiDiemDi, Date thoiDiemDen, int idChuyenXe) {
+        Session session = null;
+        boolean isConflict = false;
+
+        try {
+            if (factory == null) {
+                factory = HibernateUtils.getSessionFactory();
+            }
+            session = factory.openSession();
+
+            String hql = "SELECT COUNT(cx) FROM ChuyenXe cx " +
+                         "WHERE cx.taiXe.idNguoiDung = :idTaiXe " +
+                         "AND cx.idChuyenXe != :idChuyenXe " +
+                         "AND (:thoiDiemDi <= cx.thoiDiemDen AND :thoiDiemDen >= cx.thoiDiemDi)";
+
+            Query<Long> query = session.createQuery(hql, Long.class);
+            query.setParameter("idTaiXe", idTaiXe);
+            query.setParameter("idChuyenXe", idChuyenXe);
+            query.setParameter("thoiDiemDi", thoiDiemDi);
+            query.setParameter("thoiDiemDen", thoiDiemDen);
+
+            Long count = query.getSingleResult(); 
+            isConflict = count != null && count > 0;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            if (session != null) {
+                session.close();
+            }
+        }
+
+        return isConflict;
+    }
+    public boolean isXeTrungGioChay(int idXe, Date thoiDiemDi, Date thoiDiemDen, int idChuyenXe) {
+        Session session = null;
+        boolean isConflict = false;
+
+        try {
+            if (factory == null) {
+                factory = HibernateUtils.getSessionFactory();
+            }
+            session = factory.openSession();
+
+            String hql = "SELECT COUNT(cx) FROM ChuyenXe cx " +
+                         "WHERE cx.xe.idXe = :idXe " +
+                         "AND cx.idChuyenXe != :idChuyenXe " +
+                         "AND (:thoiDiemDi <= cx.thoiDiemDen AND :thoiDiemDen >= cx.thoiDiemDi)";
+
+            Query<Long> query = session.createQuery(hql, Long.class);
+            query.setParameter("idXe", idXe);
+            query.setParameter("idChuyenXe", idChuyenXe);
+            query.setParameter("thoiDiemDi", thoiDiemDi);
+            query.setParameter("thoiDiemDen", thoiDiemDen);
+
+            Long count = query.getSingleResult(); 
+            isConflict = count != null && count > 0;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            if (session != null) {
+                session.close();
+            }
+        }
+
+        return isConflict;
+    }
+    
     
 }
 

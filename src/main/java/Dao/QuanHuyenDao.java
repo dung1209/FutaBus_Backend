@@ -236,5 +236,35 @@ public class QuanHuyenDao {
             }
         }
     }
+    public List<QuanHuyen> getAllQuanHuyenByTinh(int idTinhThanh) {
+        List<QuanHuyen> quanHuyenList = new ArrayList<>();
+        Session session = null;
+        Transaction transaction = null;
+
+        try {
+            if (factory == null) {
+                factory = HibernateUtils.getSessionFactory();
+            }
+            session = factory.openSession();
+            transaction = session.beginTransaction();
+
+            String hql = "FROM QuanHuyen where idTinhThanh = :idTinhThanh";
+            Query<QuanHuyen> query = session.createQuery(hql, QuanHuyen.class);
+            query.setParameter("idTinhThanh", idTinhThanh);
+            quanHuyenList = query.getResultList();
+
+            transaction.commit();
+        } catch (Exception e) {
+            if (transaction != null) {
+                transaction.rollback();
+            }
+            e.printStackTrace();
+        } finally {
+            if (session != null) {
+                session.close();
+            }
+        }
+        return quanHuyenList;
+    }
 
 }

@@ -391,13 +391,23 @@ public class UserApiController {
 	            nguoiDung.setHoTen("bạn");
 	        }
 
-	        response.put("nguoiDung", Map.of(
-	            "idNguoiDung", nguoiDung.getIdNguoiDung(),
-	            "idPhanQuyen", nguoiDung.getIdPhanQuyen(),
-	            "hoTen", nguoiDung.getHoTen(),
-	            "matKhau", nguoiDung.getMatKhau(),
-	            "email", nguoiDung.getEmail()
-	        ));
+//	        response.put("nguoiDung", Map.of(
+//	            "idNguoiDung", nguoiDung.getIdNguoiDung(),
+//	            "idPhanQuyen", nguoiDung.getIdPhanQuyen(),
+//	            "hoTen", nguoiDung.getHoTen(),
+//	            "matKhau", nguoiDung.getMatKhau(),
+//	            "email", nguoiDung.getEmail()
+//	        )
+//	        		);
+	        Map<String, Object> nguoiDungMap = new HashMap<>();
+	        nguoiDungMap.put("idNguoiDung", nguoiDung.getIdNguoiDung());
+	        nguoiDungMap.put("idPhanQuyen", nguoiDung.getIdPhanQuyen());
+	        nguoiDungMap.put("hoTen", nguoiDung.getHoTen());
+	        nguoiDungMap.put("matKhau", nguoiDung.getMatKhau());
+	        nguoiDungMap.put("email", nguoiDung.getEmail());
+
+	        response.put("nguoiDung", nguoiDungMap);
+
 	    } else {
 	        System.out.println("Đăng nhập thất bại - sai thông tin!");
 	        response.put("status", "error");
