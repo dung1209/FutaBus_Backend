@@ -99,6 +99,7 @@ import java.net.http.HttpResponse;
 public class UserApiController {
 	
 	private String clientId = "909666408197-a3l5csqs07f4dj6sjoteueg7efedr48e.apps.googleusercontent.com";
+	
 	private String clientSecret = "demo_secret";
 
 	@Autowired
@@ -875,7 +876,7 @@ public class UserApiController {
     }
 
     @GetMapping("/login-google")
-    public ResponseEntity<?> loginWithGoogle(@RequestParam("code") String code) throws Exception {
+    public ResponseEntity<?> loginWithGoogle(@RequestParam("code") String code, HttpSession session) throws Exception {
         HttpClient client = HttpClient.newHttpClient();
         HttpRequest tokenRequest = HttpRequest.newBuilder()
                 .uri(URI.create("https://oauth2.googleapis.com/token"))
@@ -939,6 +940,7 @@ public class UserApiController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(Map.of("status", "fail", "message", "Không tìm thấy người dùng trong DB."));
         }
+        session.setAttribute("currentUser", nguoiDungFromDb);
 
         String redirectUrl = "http://localhost:8086/FutaBus_Frontend/login/callback?email=" + URLEncoder.encode(email, "UTF-8");
 
